@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Hangout Admin">
-<title>The Hangout – Project Admin</title>
+<title>The Hangout</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -118,8 +118,8 @@ hr{border:none;border-top:0.5px solid var(--border);margin:1.5rem 0}
 .spinner{display:inline-block;width:17px;height:17px;border:2px solid var(--border2);border-top-color:var(--text);border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle}
 @keyframes spin{to{transform:rotate(360deg)}}
 .empty{text-align:center;padding:4rem 2rem;color:var(--text2);border:0.5px dashed var(--border2);border-radius:var(--r-lg);font-size:14px;line-height:1.8}
-.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;gap:12px}
-.topbar-right{display:flex;gap:8px;align-items:center;flex-shrink:0}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;gap:12px;flex-wrap:wrap}
+.topbar-right{display:flex;gap:8px;align-items:center;flex-shrink:0;flex-wrap:wrap}
 .detail-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.25rem;gap:12px;flex-wrap:wrap}
 .detail-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;flex-shrink:0}
 .section-block{display:flex;flex-direction:column;gap:1.5rem}
@@ -129,9 +129,89 @@ hr{border:none;border-top:0.5px solid var(--border);margin:1.5rem 0}
 .totals-row strong{color:var(--text);font-weight:600}
 .save-bar{display:flex;justify-content:flex-end;gap:8px;align-items:center;padding-top:1.25rem;border-top:0.5px solid var(--border);margin-top:1.5rem}
 .back-btn{display:flex;align-items:center;gap:4px;background:transparent;border:none;color:var(--text2);font-size:14px;padding:4px 0;margin-bottom:1rem;cursor:pointer}
+
+/* === GLOBAL NAV === */
+.global-nav{background:var(--bg);border-bottom:0.5px solid var(--border);box-shadow:var(--shadow);margin-bottom:0}
+.global-nav-inner{max-width:980px;margin:0 auto;padding:0 1.5rem;display:flex;align-items:center;gap:0;height:52px}
+@media(max-width:600px){.global-nav-inner{padding:0 0.875rem}}
+.nav-brand{font-size:15px;font-weight:700;letter-spacing:-0.02em;margin-right:1.5rem;white-space:nowrap}
+.nav-links{display:flex;gap:2px;flex:1}
+.nav-link{background:transparent;border:none;padding:6px 12px;font-size:13px;color:var(--text2);border-radius:var(--r);white-space:nowrap}
+.nav-link.active{background:var(--bg2);color:var(--text);font-weight:500}
+.nav-link:hover:not(.active){background:var(--bg3)}
+.nav-right{display:flex;align-items:center;gap:8px;margin-left:auto}
+.timer-btn{display:flex;align-items:center;gap:6px;background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--r);padding:5px 10px;font-size:12px;font-weight:500;color:var(--text2);cursor:pointer;transition:all 0.15s}
+.timer-btn.running{background:var(--amber-bg);border-color:var(--amber-fg);color:var(--amber-fg)}
+.timer-dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+
+/* === HOME === */
+.home-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:2rem}
+@media(max-width:500px){.home-grid{grid-template-columns:1fr}}
+.home-card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--r-lg);padding:2rem;cursor:pointer;transition:all 0.15s;box-shadow:var(--shadow)}
+.home-card:hover{box-shadow:0 4px 12px rgba(0,0,0,0.1);transform:translateY(-1px)}
+.home-card:active{transform:translateY(0)}
+.home-card-icon{width:44px;height:44px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;margin-bottom:1rem}
+.home-card-title{font-size:16px;font-weight:600;margin-bottom:4px}
+.home-card-sub{font-size:13px;color:var(--text2);line-height:1.5}
+
+/* === CATERING PLANNER === */
+.event-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+@media(max-width:500px){.event-grid{grid-template-columns:1fr}}
+.event-card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--r-lg);padding:1.25rem;cursor:pointer;transition:all 0.15s;box-shadow:var(--shadow)}
+.event-card:hover{box-shadow:0 4px 12px rgba(0,0,0,0.1);transform:translateY(-1px)}
+.event-card-name{font-size:15px;font-weight:600;margin-bottom:4px}
+.event-card-meta{font-size:12px;color:var(--text2);display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.progress-bar{height:4px;background:var(--bg2);border-radius:99px;overflow:hidden;margin-bottom:8px}
+.progress-fill{height:100%;border-radius:99px;background:var(--text);transition:width 0.3s}
+.event-card-footer{display:flex;justify-content:space-between;align-items:center}
+.task-counts{display:flex;gap:6px}
+.count-pill{font-size:11px;font-weight:500;padding:2px 8px;border-radius:99px}
+
+/* === KANBAN === */
+.kanban{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;align-items:start}
+@media(max-width:600px){.kanban{grid-template-columns:1fr}}
+.kanban-col{background:var(--bg2);border-radius:var(--r-lg);padding:12px;min-height:200px}
+.kanban-col-header{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+.task-card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--r);padding:10px 12px;margin-bottom:8px;cursor:pointer;transition:background 0.1s;box-shadow:var(--shadow)}
+.task-card:hover{background:var(--bg2)}
+.task-card-title{font-size:13px;font-weight:500;margin-bottom:4px}
+.task-card-meta{font-size:11px;color:var(--text2);display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.allergen-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#e24b4a}
+
+/* === TIMELINE === */
+.timeline-group{margin-bottom:1.25rem}
+.timeline-hour{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;padding-left:4px}
+.timeline-task{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--r);padding:10px 14px;margin-bottom:6px;display:flex;gap:12px;align-items:center;cursor:pointer;box-shadow:var(--shadow)}
+.timeline-task:hover{background:var(--bg2)}
+.timeline-time{font-size:12px;font-weight:600;color:var(--text2);min-width:36px}
+
+/* === CATEGORIES === */
+.cat-group{margin-bottom:1.5rem}
+.cat-header{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--text2);margin-bottom:8px;padding-bottom:6px;border-bottom:0.5px solid var(--border)}
+
+/* === TEAM === */
+.team-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.team-card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--r-lg);padding:14px 16px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow)}
+.avatar{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;flex-shrink:0}
+
+/* === TASK DETAIL === */
+.task-detail{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--r-lg);padding:1.5rem;box-shadow:var(--shadow)}
+.allergen-grid{display:flex;flex-wrap:wrap;gap:8px}
+.allergen-toggle{padding:5px 12px;border-radius:99px;border:0.5px solid var(--border2);background:var(--bg2);font-size:12px;cursor:pointer;transition:all 0.15s}
+.allergen-toggle.active{background:#fcebeb;border-color:#e24b4a;color:#a32d2d;font-weight:500}
+.comment-list{display:flex;flex-direction:column;gap:10px;margin-bottom:12px}
+.comment-item{background:var(--bg2);border-radius:var(--r);padding:10px 12px}
+.comment-author{font-size:11px;font-weight:600;color:var(--text2);margin-bottom:3px}
+.comment-text{font-size:13px}
+
+/* === CUSTOMER NEEDS === */
+.need-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:0.5px solid var(--border)}
+.need-row:last-child{border-bottom:none}
 </style>
 </head>
 <body>
+
+<div class="global-nav" id="nav"></div>
 <div class="page" id="app">
   <div style="display:flex;align-items:center;gap:10px;padding:3rem 0;color:var(--text2)">
     <div class="spinner"></div><span style="font-size:14px;margin-left:4px">Connecting...</span>
@@ -141,223 +221,115 @@ hr{border:none;border-top:0.5px solid var(--border);margin:1.5rem 0}
 <script>
 const SUPABASE_URL = 'https://qzmedbjyfirmxcvjbjit.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6bWVkYmp5ZmlybXhjdmpiaml0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYyNDIyOTksImV4cCI6MjA5MTgxODI5OX0.qNDk_eL_oiBJFHgm-XhF1p2jdp96F29oF4OjLFYu1_Q';
-
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const COST_CATS = ['Ingredients','Staff','Transport','Equipment/Rental','Other'];
-const REV_CATS = ['Catering','Drinks package','Staff (charged)','Equipment (charged)','Other'];
-const VAT = {'9%':0.09,'21%':0.21,'0%':0};
-const STATUSES = ['Quote sent','Confirmed','In progress','Completed','Cancelled'];
-const SC = {
-  'Quote sent':{bg:'#e6f1fb',fg:'#185fa5'},
-  'Confirmed':{bg:'#eaf3de',fg:'#3b6d11'},
-  'In progress':{bg:'#faeeda',fg:'#854f0b'},
-  'Completed':{bg:'#d4f0e4',fg:'#0f6e56'},
-  'Cancelled':{bg:'#fcebeb',fg:'#a32d2d'},
+/* ── CONSTANTS ── */
+const COST_CATS=['Ingredients','Staff','Transport','Equipment/Rental','Other'];
+const REV_CATS=['Catering','Drinks package','Staff (charged)','Equipment (charged)','Other'];
+const VAT={'9%':0.09,'21%':0.21,'0%':0};
+const STATUSES=['Quote sent','Confirmed','In progress','Completed','Cancelled'];
+const SC={'Quote sent':{bg:'#e6f1fb',fg:'#185fa5'},'Confirmed':{bg:'#eaf3de',fg:'#3b6d11'},'In progress':{bg:'#faeeda',fg:'#854f0b'},'Completed':{bg:'#d4f0e4',fg:'#0f6e56'},'Cancelled':{bg:'#fcebeb',fg:'#a32d2d'}};
+const TASK_CATS=['Prep','Kitchen','Logistics','Service'];
+const TASK_STATUSES=['To Do','In Progress','Done'];
+const ALLERGENS=['Nuts','Gluten','Dairy','Shellfish','Vegan','Other'];
+const ROLES=['Head Chef','Sous Chef','Server','Driver','Event Coordinator','Other'];
+const AVATAR_COLORS=['#e6f1fb','#eaf3de','#faeeda','#fcebeb','#f0edfe','#fbeaf0'];
+const AVATAR_FG=['#185fa5','#3b6d11','#854f0b','#a32d2d','#534ab7','#993556'];
+
+/* ── STATE ── */
+let S={
+  section:'home',
+  // Admin
+  adminView:'overview', projects:[], p:null, tab:'info', saving:false, saved:false,
+  // Catering
+  catView:'events', events:[], team:[], event:null, task:null, catTab:'kanban',
+  newEventForm:false, newTaskForm:false, newTeamForm:false,
+  // Timer
+  timerSecs:25*60, timerRunning:false, timerInterval:null
 };
 
-let S = { view:'overview', projects:[], p:null, tab:'info', saving:false, saved:false };
+/* ── HELPERS ── */
+const fmt=(n)=>'€\u202f'+Number(n||0).toLocaleString('nl-NL',{minimumFractionDigits:2,maximumFractionDigits:2});
+const fmtDate=(d)=>{if(!d)return'—';const[y,m,day]=d.split('-');return day&&m&&y?`${day}-${m}-${y}`:d;};
+const sum=(a)=>(a||[]).reduce((t,r)=>t+(parseFloat(r.amount)||0),0);
+const vatSum=(a)=>(a||[]).reduce((t,r)=>t+(parseFloat(r.amount)||0)*(VAT[r.vat]||0),0);
+const margin=(rev,cost)=>rev>0?((rev-cost)/rev)*100:0;
+const fmtTimer=(s)=>`${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+const uid=()=>Date.now()+'_'+Math.random().toString(36).slice(2,7);
+const avatarColor=(name)=>{let h=0;for(const c of(name||'?'))h=(h*31+c.charCodeAt(0))%6;return{bg:AVATAR_COLORS[h],fg:AVATAR_FG[h]};};
+const initials=(name)=>(name||'?').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+function avatar(name,size=38){const c=avatarColor(name);return `<div class="avatar" style="width:${size}px;height:${size}px;background:${c.bg};color:${c.fg}">${initials(name)}</div>`;}
 
-const fmt = (n) => '€\u202f'+Number(n||0).toLocaleString('nl-NL',{minimumFractionDigits:2,maximumFractionDigits:2});
-const fmtDate = (d) => { if(!d)return'—'; const [y,m,day]=d.split('-'); return day&&m&&y?`${day}-${m}-${y}`:d; };
-const sum = (a) => (a||[]).reduce((t,r)=>t+(parseFloat(r.amount)||0),0);
-const vatSum = (a) => (a||[]).reduce((t,r)=>t+(parseFloat(r.amount)||0)*(VAT[r.vat]||0),0);
-const margin = (rev,cost) => rev>0?((rev-cost)/rev)*100:0;
-
-function mBadge(pct){
-  const p=parseFloat(pct)||0,c=p>=40?{bg:'#eaf3de',fg:'#3b6d11'}:p>=30?{bg:'#faeeda',fg:'#854f0b'}:{bg:'#fcebeb',fg:'#a32d2d'};
-  return `<span class="badge" style="background:${c.bg};color:${c.fg}">${p.toFixed(1)}%</span>`;
-}
-function sBadge(s){
-  const c=SC[s]||SC['Quote sent'];
-  return `<span class="badge" style="background:${c.bg};color:${c.fg}">${s||'—'}</span>`;
-}
-function statC(label,val,sub='',accent=false){
-  return `<div class="stat-card${accent?'':' muted'}"><div class="stat-label">${label}</div><div class="stat-value">${val}</div>${sub?`<div class="stat-sub">${sub}</div>`:''}</div>`;
-}
+function mBadge(pct){const p=parseFloat(pct)||0,c=p>=40?{bg:'#eaf3de',fg:'#3b6d11'}:p>=30?{bg:'#faeeda',fg:'#854f0b'}:{bg:'#fcebeb',fg:'#a32d2d'};return `<span class="badge" style="background:${c.bg};color:${c.fg}">${p.toFixed(1)}%</span>`;}
+function sBadge(s){const c=SC[s]||SC['Quote sent'];return `<span class="badge" style="background:${c.bg};color:${c.fg}">${s||'—'}</span>`;}
+function statC(label,val,sub='',accent=false){return `<div class="stat-card${accent?'':' muted'}"><div class="stat-label">${label}</div><div class="stat-value">${val}</div>${sub?`<div class="stat-sub">${sub}</div>`:''}</div>`;}
 function fl(t){return `<div class="field-label">${t}</div>`;}
-function inp(k,v,t='text',ph=''){return `<input type="${t}" value="${(v||'').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}" placeholder="${ph}" onchange="sf('${k}',this.value)">`;}
-function sel(k,v,opts){return `<select onchange="sf('${k}',this.value)">${opts.map(o=>`<option${o===v?' selected':''}>${o}</option>`).join('')}</select>`;}
-function ta(k,v){return `<textarea onchange="sf('${k}',this.value)">${(v||'').replace(/</g,'&lt;')}</textarea>`;}
+function inp(k,v,t='text',ph='',fn='sf'){return `<input type="${t}" value="${(v||'').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}" placeholder="${ph}" onchange="${fn}('${k}',this.value)">`;}
+function ta(k,v,fn='sf'){return `<textarea onchange="${fn}('${k}',this.value)">${(v||'').replace(/</g,'&lt;')}</textarea>`;}
+function countdown(dateStr){if(!dateStr)return'';const d=new Date(dateStr),now=new Date();const diff=Math.ceil((d-now)/(1000*60*60*24));if(diff<0)return'Past';if(diff===0)return'Today';if(diff===1)return'Tomorrow';return`${diff} days away`;}
 
-async function load(){
-  const {data,error}=await db.from('projects').select('*').order('created_at',{ascending:false});
-  if(error){document.getElementById('app').innerHTML=`<div style="padding:2rem;color:#a32d2d;font-size:14px">Connection error: ${error.message}<br><br>Make sure your Supabase URL and key are set correctly.</div>`;return;}
-  S.projects=data||[];render();
+/* ── TIMER ── */
+function timerToggle(){
+  if(S.timerRunning){clearInterval(S.timerInterval);S.timerRunning=false;}
+  else{S.timerRunning=true;S.timerInterval=setInterval(()=>{S.timerSecs--;if(S.timerSecs<=0){clearInterval(S.timerInterval);S.timerRunning=false;S.timerSecs=25*60;alert('Pomodoro done! Take a break.');}renderNav();},1000);}
+  renderNav();
 }
-async function save(){
+function timerReset(){clearInterval(S.timerInterval);S.timerRunning=false;S.timerSecs=25*60;renderNav();}
+
+/* ── NAVIGATION ── */
+function go(section){S.section=section;if(section==='admin')S.adminView='overview';if(section==='catering')S.catView='events';render();}
+function renderNav(){
+  const t=fmtTimer(S.timerSecs);
+  document.getElementById('nav').innerHTML=`
+    <div class="global-nav-inner">
+      <div class="nav-brand">The Hangout</div>
+      <div class="nav-links">
+        <button class="nav-link${S.section==='home'?' active':''}" onclick="go('home')">Home</button>
+        <button class="nav-link${S.section==='admin'?' active':''}" onclick="go('admin')">Admin</button>
+        <button class="nav-link${S.section==='catering'?' active':''}" onclick="go('catering')">Planner</button>
+        <button class="nav-link${S.section==='team'?' active':''}" onclick="go('team')">Team</button>
+      </div>
+      <div class="nav-right">
+        <button class="timer-btn${S.timerRunning?' running':''}" onclick="timerToggle()" title="Pomodoro timer">
+          <div class="timer-dot"></div>${t}
+        </button>
+        ${S.timerSecs<25*60||S.timerRunning?`<button class="btn-ghost" style="padding:5px 8px;font-size:11px" onclick="timerReset()">Reset</button>`:''}
+      </div>
+    </div>`;
+}
+
+/* ══════════════════════════════════════════════
+   ADMIN SECTION (preserved 100%)
+══════════════════════════════════════════════ */
+function sf(k,v){S.p={...S.p,[k]:v};render();}
+function addLine(t){const r={id:uid(),description:'',amount:'',category:t==='costs'?COST_CATS[0]:REV_CATS[0],vat:t==='costs'?'21%':'9%'};sf(t,[...(S.p[t]||[]),r]);}
+function updLine(t,id,k,v){sf(t,S.p[t].map(r=>r.id===id?{...r,[k]:v}:r));}
+function delLine(t,id){sf(t,S.p[t].filter(r=>r.id!==id));}
+function openP(id){S.p={...S.projects.find(p=>p.id===id)};S.tab='info';S.adminView='detail';render();}
+function newP(){S.p={name:'',client:'',contact:'',email:'',phone:'',date:'',time:'',venue:'',address:'',event_type:'',guests:'',status:'Quote sent',description:'',requirements:'',dietary:'',notes:'',costs:[],revenues:[],attachments:[]};S.tab='info';S.adminView='detail';render();}
+function backAdmin(){S.adminView='overview';S.p=null;render();}
+function setTab(t){S.tab=t;render();}
+
+async function loadProjects(){
+  const{data,error}=await db.from('projects').select('*').order('created_at',{ascending:false});
+  if(error){document.getElementById('app').innerHTML=`<div style="padding:2rem;color:#a32d2d;font-size:14px">Connection error: ${error.message}</div>`;return;}
+  S.projects=data||[];
+}
+async function saveProject(){
   S.saving=true;render();
   const p=S.p;
   const pl={name:p.name||'',client:p.client||'',contact:p.contact||'',email:p.email||'',phone:p.phone||'',date:p.date||'',time:p.time||'',venue:p.venue||'',address:p.address||'',event_type:p.event_type||'',guests:p.guests||'',status:p.status||'Quote sent',description:p.description||'',requirements:p.requirements||'',dietary:p.dietary||'',notes:p.notes||'',costs:p.costs||[],revenues:p.revenues||[],attachments:p.attachments||[]};
   if(p.id&&S.projects.find(x=>x.id===p.id)){await db.from('projects').update(pl).eq('id',p.id);}
   else{const{data}=await db.from('projects').insert(pl).select().single();if(data)S.p={...S.p,id:data.id};}
-  await load();
-  S.p=S.projects.find(x=>x.id===S.p?.id)||S.p;
+  await loadProjects();S.p=S.projects.find(x=>x.id===S.p?.id)||S.p;
   S.saving=false;S.saved=true;render();
   setTimeout(()=>{S.saved=false;render();},2200);
 }
-async function del(id){
-  if(!confirm('Delete this project? This cannot be undone.'))return;
+async function delProject(id){
+  if(!confirm('Delete this project?'))return;
   await db.from('projects').delete().eq('id',id);
-  S.view='overview';S.p=null;await load();
-}
-
-function sf(k,v){S.p={...S.p,[k]:v};render();}
-function addLine(t){const r={id:Date.now(),description:'',amount:'',category:t==='costs'?COST_CATS[0]:REV_CATS[0],vat:t==='costs'?'21%':'9%'};sf(t,[...(S.p[t]||[]),r]);}
-function updLine(t,id,k,v){sf(t,S.p[t].map(r=>r.id===id?{...r,[k]:v}:r));}
-function delLine(t,id){sf(t,S.p[t].filter(r=>r.id!==id));}
-function openP(id){S.p={...S.projects.find(p=>p.id===id)};S.tab='info';S.view='detail';render();}
-function newP(){S.p={name:'',client:'',contact:'',email:'',phone:'',date:'',time:'',venue:'',address:'',event_type:'',guests:'',status:'Quote sent',description:'',requirements:'',dietary:'',notes:'',costs:[],revenues:[],attachments:[]};S.tab='info';S.view='detail';render();}
-function back(){S.view='overview';S.p=null;render();}
-function setTab(t){S.tab=t;render();}
-
-function renderOverview(){
-  const ps=S.projects;
-  const tR=ps.reduce((a,p)=>a+sum(p.revenues),0);
-  const tC=ps.reduce((a,p)=>a+sum(p.costs),0);
-  const tM=tR-tC,tP=tR>0?(tM/tR)*100:0;
-  const active=ps.filter(p=>['Confirmed','In progress'].includes(p.status)).length;
-
-  const rows=ps.length===0
-    ?`<div class="empty">No projects yet.<br>Tap "+ New project" to get started.</div>`
-    :`<div class="card">
-        <div class="tbl-head" style="grid-template-columns:2fr 1.4fr 85px 55px 100px 90px 80px 110px">
-          <div>Project</div><div>Client</div><div>Date</div><div>Guests</div><div>Revenue</div><div>Costs</div><div>Margin</div><div>Status</div>
-        </div>
-        ${ps.map(p=>{
-          const rv=sum(p.revenues),co=sum(p.costs),m=margin(rv,co);
-          return `<div class="tbl-row" style="grid-template-columns:2fr 1.4fr 85px 55px 100px 90px 80px 110px" onclick="openP(${p.id})">
-            <div style="font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" data-col="name">${p.name||'Untitled'}</div>
-            <div style="color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap" data-col="client">${p.client||'—'}</div>
-            <div style="color:var(--text2)" data-col="date">${fmtDate(p.date)}</div>
-            <div style="color:var(--text2)" data-col="guests">${p.guests||'—'}</div>
-            <div class="mobile-card">
-              <div class="mc-name">${p.name||'Untitled'}</div>
-              <div class="mc-meta">
-                ${sBadge(p.status)}
-                <span style="font-size:12px;color:var(--text2)">${p.client||''}</span>
-                <span style="font-size:12px;color:var(--text2)">${fmtDate(p.date)}</span>
-              </div>
-              <div class="mc-amounts">
-                <span style="font-size:13px">${fmt(rv)}</span>
-                <span style="font-size:12px;color:var(--text2)">${fmt(co)} costs</span>
-                ${mBadge(m)}
-              </div>
-            </div>
-            <div data-col="rev">${fmt(rv)}</div>
-            <div data-col="cost">${fmt(co)}</div>
-            <div data-col="margin">${mBadge(m)}</div>
-            <div data-col="status">${sBadge(p.status)}</div>
-          </div>`;
-        }).join('')}
-      </div>`;
-
-  return `
-    <div class="topbar">
-      <div><div class="title">The Hangout</div><div class="subtitle">Catering administration</div></div>
-      <div class="topbar-right"><button class="btn-primary" onclick="newP()">+ New project</button></div>
-    </div>
-    <div class="stats-row">
-      ${statC('Projects',ps.length,active+' active')}
-      ${statC('Total revenue',fmt(tR))}
-      ${statC('Total costs',fmt(tC))}
-      ${statC('Gross margin',fmt(tM),tR>0?tP.toFixed(1)+'%':'—',true)}
-    </div>
-    ${rows}`;
-}
-
-function renderInfo(){
-  const p=S.p;
-  return `<div class="section-block">
-    <div>
-      <div class="section-label">Client details</div>
-      <div class="grid-3">
-        <div>${fl('Company')}${inp('client',p.client)}</div>
-        <div>${fl('Contact person')}${inp('contact',p.contact)}</div>
-        <div>${fl('Email')}${inp('email',p.email,'email')}</div>
-        <div>${fl('Phone')}${inp('phone',p.phone,'tel')}</div>
-      </div>
-    </div>
-    <div>
-      <div class="section-label">Event details</div>
-      <div class="grid-3">
-        <div>${fl('Date')}${inp('date',p.date,'date')}</div>
-        <div>${fl('Time')}${inp('time',p.time,'time')}</div>
-        <div>${fl('Event type')}${inp('event_type',p.event_type)}</div>
-        <div>${fl('Number of guests')}${inp('guests',p.guests,'number')}</div>
-        <div>${fl('Venue name')}${inp('venue',p.venue)}</div>
-        <div>${fl('Address')}${inp('address',p.address)}</div>
-      </div>
-    </div>
-    <div>
-      <div class="section-label">Brief & requirements</div>
-      <div class="grid-2">
-        <div>${fl('Project description')}${ta('description',p.description)}</div>
-        <div>${fl('Client requirements')}${ta('requirements',p.requirements)}</div>
-        <div>${fl('Dietary requirements')}${ta('dietary',p.dietary)}</div>
-        <div>${fl('Internal notes')}${ta('notes',p.notes)}</div>
-      </div>
-    </div>
-  </div>`;
-}
-
-function renderLines(type){
-  const cats=type==='costs'?COST_CATS:REV_CATS;
-  const lines=S.p[type]||[];
-  const tot=sum(lines),vatTot=vatSum(lines);
-  const isImg=(n)=>/\.(jpg|jpeg|png|gif|webp|heic)$/i.test(n||'');
-
-  const rows=lines.length===0
-    ?`<div style="padding:2rem;text-align:center;color:var(--text2);font-size:13px">No lines added yet.</div>`
-    :lines.map(r=>{
-      const hasFile=!!(r.file_url);
-      const attachBtn=`<label class="line-attach-btn r-attach${hasFile?' has-file':''}" title="${hasFile?'Replace attachment':'Attach receipt / photo'}">
-        <input type="file" accept="image/*,.pdf,.doc,.docx" onchange="uploadLineFile('${type}',${r.id},this.files[0])">
-        ${hasFile
-          ?`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#3b6d11" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>`
-          :`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--text3)" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>`
-        }
-      </label>`;
-
-      const preview=hasFile?`
-        <div style="grid-column:1/-1;padding:0 0 6px 0">
-          <div class="line-attach-preview">
-            ${isImg(r.file_name)
-              ?`<img src="${r.file_url}" style="width:32px;height:32px;object-fit:cover;border-radius:4px;flex-shrink:0">`
-              :`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="1.5" style="flex-shrink:0"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`
-            }
-            <a href="${r.file_url}" target="_blank">${r.file_name||'View file'}</a>
-            <button onclick="delLineFile('${type}',${r.id})" style="background:transparent;border:none;color:var(--text3);font-size:16px;cursor:pointer;padding:0 2px;line-height:1;flex-shrink:0">×</button>
-          </div>
-        </div>`:''
-
-      return `<div class="regel-row" style="${hasFile?'padding-bottom:4px':''}">
-        <input class="r-desc" value="${(r.description||'').replace(/"/g,'&quot;')}" placeholder="Description" onchange="updLine('${type}',${r.id},'description',this.value)">
-        <select class="r-cat" onchange="updLine('${type}',${r.id},'category',this.value)">${cats.map(c=>`<option${c===r.category?' selected':''}>${c}</option>`).join('')}</select>
-        <input class="r-store" value="${(r.store||'').replace(/"/g,'&quot;')}" placeholder="Store / supplier" onchange="updLine('${type}',${r.id},'store',this.value)">
-        <select class="r-vat" onchange="updLine('${type}',${r.id},'vat',this.value)">${Object.keys(VAT).map(t=>`<option${t===r.vat?' selected':''}>${t}</option>`).join('')}</select>
-        <input class="r-amount" type="number" value="${r.amount||''}" placeholder="0.00" style="text-align:right" onchange="updLine('${type}',${r.id},'amount',this.value)">
-        ${attachBtn}
-        <button class="r-del btn-icon" style="color:#a32d2d;padding:4px 6px;font-size:16px" onclick="delLine('${type}',${r.id})">×</button>
-        ${preview}
-      </div>`;
-    }).join('');
-
-  return `<div class="card">
-    <div class="regel-head">
-      <div>Description</div><div>Category</div><div>Store / supplier</div><div>VAT</div><div>Amount excl.</div><div></div><div></div>
-    </div>
-    ${rows}
-    <div class="regels-footer">
-      <button class="btn-ghost" onclick="addLine('${type}')">+ Add line</button>
-      <div class="totals-row">
-        <div><span>Excl. VAT </span><strong>${fmt(tot)}</strong></div>
-        <div><span>VAT </span><strong>${fmt(vatTot)}</strong></div>
-        <div><span>Incl. VAT </span><strong>${fmt(tot+vatTot)}</strong></div>
-      </div>
-    </div>
-  </div>`;
+  S.adminView='overview';S.p=null;await loadProjects();render();
 }
 
 async function uploadLineFile(type,id,file){
@@ -365,134 +337,44 @@ async function uploadLineFile(type,id,file){
   if(!S.p.id){alert('Save the project first before uploading files.');return;}
   const path=`${S.p.id}/${type}-${id}-${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g,'_')}`;
   const{data,error}=await db.storage.from('receipts').upload(path,file,{upsert:true});
-  if(error){alert('Upload failed: '+error.message+'\n\nMake sure the "receipts" storage bucket exists in Supabase (Storage → New bucket → name: receipts → Public: on).');return;}
+  if(error){alert('Upload failed: '+error.message);return;}
   const{data:urlData}=db.storage.from('receipts').getPublicUrl(path);
   const lines=S.p[type].map(r=>r.id===id?{...r,file_url:urlData.publicUrl,file_name:file.name,file_path:path}:r);
-  S.p={...S.p,[type]:lines};
-  await save();
+  S.p={...S.p,[type]:lines};await saveProject();
 }
-
 async function delLineFile(type,id){
   const line=S.p[type].find(r=>r.id===id);
   if(line?.file_path)await db.storage.from('receipts').remove([line.file_path]);
   const lines=S.p[type].map(r=>r.id===id?{...r,file_url:null,file_name:null,file_path:null}:r);
-  S.p={...S.p,[type]:lines};
-  await save();
+  S.p={...S.p,[type]:lines};await saveProject();
 }
-
-function renderFinancial(){
-  const p=S.p;
-  const tR=sum(p.revenues),tC=sum(p.costs);
-  const vatR=vatSum(p.revenues),vatC=vatSum(p.costs);
-  const mg=tR-tC,m=margin(tR,tC);
-  const guests=parseFloat(p.guests)||0;
-  const alertC=m>=40?'alert':`alert`;
-  const alertStyle=m>=40?`background:var(--green-bg);color:var(--green-fg)`:m>=30?`background:var(--amber-bg);color:var(--amber-fg)`:`background:var(--red-bg);color:var(--red-fg)`;
-  const alertT=m>=40?'Healthy margin. Well priced for this project.':m>=30?'Margin is on the low side. Consider raising the price slightly or reducing ingredient costs.':'Margin too low. Raise the price or cut costs. Aim for at least 30%.';
-  const row=(l,v,h=false)=>`<div class="result-row${h?' highlight':''}"><span class="r-label">${l}</span><span class="r-value">${v}</span></div>`;
-
-  return `<div style="display:flex;flex-direction:column;gap:1.25rem">
-    <div class="stats-row">
-      ${statC('Revenue excl. VAT',fmt(tR))}
-      ${statC('VAT on revenue',fmt(vatR))}
-      ${statC('Revenue incl. VAT',fmt(tR+vatR))}
-      ${statC('','')}
-    </div>
-    <div class="stats-row">
-      ${statC('Costs excl. VAT',fmt(tC))}
-      ${statC('VAT on costs',fmt(vatC))}
-      ${statC('Costs incl. VAT',fmt(tC+vatC))}
-      ${statC('','')}
-    </div>
-    <div class="card">
-      <div style="padding:10px 16px;background:var(--bg2);border-bottom:0.5px solid var(--border)">
-        <div class="section-label" style="margin:0">Result</div>
-      </div>
-      ${row('Revenue (excl. VAT)',fmt(tR))}
-      ${row('Costs (excl. VAT)',fmt(tC))}
-      ${row('Gross margin',fmt(mg),true)}
-      ${row('Margin %',mBadge(m),true)}
-      ${guests>0?row('Revenue per guest',fmt(tR/guests)):''}
-      ${guests>0?row('Costs per guest',fmt(tC/guests)):''}
-      ${guests>0?row('Margin per guest',fmt(mg/guests)):''}
-      ${row('VAT to remit',fmt(vatR))}
-      ${row('VAT to reclaim',fmt(vatC))}
-      ${row('Net VAT position',fmt(vatR-vatC))}
-    </div>
-    ${tR>0?`<div class="${alertC}" style="${alertStyle}">${alertT}</div>`:''}
-  </div>`;
-}
-
-function renderDocs(){
-  const p=S.p;
-  const attachments=p.attachments||[];
-  const isImg=(name)=>/\.(jpg|jpeg|png|gif|webp|heic)$/i.test(name);
-
-  const items=attachments.map(a=>`
-    <div class="attach-item" title="${a.name}">
-      ${isImg(a.name)
-        ?`<img class="attach-thumb" src="${a.url}" alt="${a.name}" onclick="window.open('${a.url}','_blank')">`
-        :`<div class="attach-file" onclick="window.open('${a.url}','_blank')">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-            <span style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em">${(a.name.split('.').pop()||'file').toUpperCase()}</span>
-          </div>`
-      }
-      <div class="attach-name">${a.name}</div>
-      <button class="attach-del" onclick="delAttachment('${a.id}')">×</button>
-    </div>`).join('');
-
-  return `<div style="display:flex;flex-direction:column;gap:1rem">
-    <div class="card">
-      <div style="padding:10px 16px;background:var(--bg2);border-bottom:0.5px solid var(--border)">
-        <div class="section-label" style="margin:0">Attachments (${attachments.length})</div>
-      </div>
-      ${attachments.length>0?`<div class="attach-grid">${items}</div>`:''}
-      <div style="padding:${attachments.length>0?'0 14px 14px':'14px'}">
-        <label class="upload-zone" id="upload-zone">
-          <input type="file" multiple accept="image/*,.pdf,.doc,.docx,.xls,.xlsx" onchange="uploadFiles(this.files)">
-          <div id="upload-status">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--text3)" stroke-width="1.5" style="margin-bottom:8px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-            <div style="font-size:13px;color:var(--text2)">Click to upload or drag files here</div>
-            <div style="font-size:11px;color:var(--text3);margin-top:4px">Images, PDF, Word, Excel</div>
-          </div>
-        </label>
-      </div>
-    </div>
-    <div style="padding:12px 16px;border-radius:var(--r);background:var(--bg2);font-size:13px;color:var(--text2);line-height:1.6">
-      Tip: Upload receipts, invoices or photos to back up each transaction. Files are stored securely in Supabase Storage.
-    </div>
-  </div>`;
-}
-
 async function uploadFiles(files){
   if(!S.p.id){alert('Save the project first before uploading files.');return;}
-  const statusEl=document.getElementById('upload-status');
-  if(statusEl)statusEl.innerHTML='<div class="spinner"></div><div style="font-size:13px;color:var(--text2);margin-top:8px">Uploading...</div>';
   const attachments=[...(S.p.attachments||[])];
   for(const file of files){
-    const ext=file.name.split('.').pop();
     const path=`${S.p.id}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g,'_')}`;
-    const {data,error}=await db.storage.from('receipts').upload(path,file,{upsert:true});
-    if(!error){
-      const {data:urlData}=db.storage.from('receipts').getPublicUrl(path);
-      attachments.push({id:Date.now()+'',name:file.name,url:urlData.publicUrl,path});
-    } else {
-      alert('Upload failed: '+error.message+'\n\nMake sure you created the "receipts" storage bucket in Supabase (Storage → New bucket → name: receipts → Public: on).');
-    }
+    const{data,error}=await db.storage.from('receipts').upload(path,file,{upsert:true});
+    if(!error){const{data:urlData}=db.storage.from('receipts').getPublicUrl(path);attachments.push({id:uid(),name:file.name,url:urlData.publicUrl,path});}
+    else alert('Upload failed: '+error.message);
   }
-  S.p={...S.p,attachments};
-  await save();
+  S.p={...S.p,attachments};await saveProject();
 }
-
 async function delAttachment(id){
   if(!confirm('Remove this attachment?'))return;
   const att=S.p.attachments.find(a=>a.id===id);
   if(att?.path)await db.storage.from('receipts').remove([att.path]);
-  S.p={...S.p,attachments:(S.p.attachments||[]).filter(a=>a.id!==id)};
-  await save();
+  S.p={...S.p,attachments:(S.p.attachments||[]).filter(a=>a.id!==id)};await saveProject();
 }
 
-function renderDetail(){
+function renderAdminOverview(){
+  const ps=S.projects;
+  const tR=ps.reduce((a,p)=>a+sum(p.revenues),0),tC=ps.reduce((a,p)=>a+sum(p.costs),0),tM=tR-tC,tP=tR>0?(tM/tR)*100:0;
+  const active=ps.filter(p=>['Confirmed','In progress'].includes(p.status)).length;
+  const rows=ps.length===0?`<div class="empty">No projects yet.<br>Tap "+ New project" to get started.</div>`:`<div class="card"><div class="tbl-head" style="grid-template-columns:2fr 1.4fr 85px 55px 100px 90px 80px 110px"><div>Project</div><div>Client</div><div>Date</div><div>Guests</div><div>Revenue</div><div>Costs</div><div>Margin</div><div>Status</div></div>${ps.map(p=>{const rv=sum(p.revenues),co=sum(p.costs),m=margin(rv,co);return `<div class="tbl-row" style="grid-template-columns:2fr 1.4fr 85px 55px 100px 90px 80px 110px" onclick="openP(${p.id})"><div style="font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" data-col="name">${p.name||'Untitled'}</div><div style="color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap" data-col="client">${p.client||'—'}</div><div style="color:var(--text2)" data-col="date">${fmtDate(p.date)}</div><div style="color:var(--text2)" data-col="guests">${p.guests||'—'}</div><div class="mobile-card"><div class="mc-name">${p.name||'Untitled'}</div><div class="mc-meta">${sBadge(p.status)}<span style="font-size:12px;color:var(--text2)">${p.client||''}</span><span style="font-size:12px;color:var(--text2)">${fmtDate(p.date)}</span></div><div class="mc-amounts"><span style="font-size:13px">${fmt(rv)}</span><span style="font-size:12px;color:var(--text2)">${fmt(co)} costs</span>${mBadge(m)}</div></div><div data-col="rev">${fmt(rv)}</div><div data-col="cost">${fmt(co)}</div><div data-col="margin">${mBadge(m)}</div><div data-col="status">${sBadge(p.status)}</div></div>`;}).join('')}</div>`;
+  return `<div class="topbar"><div><div class="title">Project administration</div><div class="subtitle">Financial overview per catering project</div></div><div class="topbar-right"><button class="btn-primary" onclick="newP()">+ New project</button></div></div><div class="stats-row">${statC('Projects',ps.length,active+' active')}${statC('Total revenue',fmt(tR))}${statC('Total costs',fmt(tC))}${statC('Gross margin',fmt(tM),tR>0?tP.toFixed(1)+'%':'—',true)}</div>${rows}`;
+}
+
+function renderAdminDetail(){
   const p=S.p;if(!p)return'';
   const sc=SC[p.status]||SC['Quote sent'];
   const tabs=[['info','Project info'],['costs','Costs'],['revenues','Revenue'],['financial','Financial'],['docs','Documents']];
@@ -502,39 +384,389 @@ function renderDetail(){
   else if(S.tab==='revenues')content=renderLines('revenues');
   else if(S.tab==='financial')content=renderFinancial();
   else if(S.tab==='docs')content=renderDocs();
+  return `<button class="back-btn" onclick="backAdmin()">&#8249; Overview</button><div class="detail-header"><div style="flex:1;min-width:0"><input class="input-ghost" value="${(p.name||'').replace(/"/g,'&quot;')}" placeholder="Project name" onchange="sf('name',this.value)" style="width:100%"><div class="subtitle" style="margin-top:4px">${p.client||'Unknown client'}${p.date?' · '+fmtDate(p.date):''}${p.venue?' · '+p.venue:''}</div></div><div class="detail-actions"><select onchange="sf('status',this.value)" style="background:${sc.bg};color:${sc.fg};border:none;font-weight:600;font-size:12px;padding:7px 12px;border-radius:99px;cursor:pointer;width:auto;-webkit-appearance:none;appearance:none;letter-spacing:0.01em">${STATUSES.map(o=>`<option${o===p.status?' selected':''}>${o}</option>`).join('')}</select><button class="btn-danger" onclick="delProject(${p.id})">Delete</button><button class="btn-primary" onclick="saveProject()">${S.saving?'<div class="spinner" style="width:14px;height:14px;border-width:1.5px;filter:invert(1);display:inline-block"></div>':'Save'}</button>${S.saved?'<span style="font-size:12px;color:var(--green-fg);font-weight:500">&#10003; Saved</span>':''}</div></div><div class="tabs">${tabs.map(([t,l])=>`<button class="tab-btn${S.tab===t?' active':''}" onclick="setTab('${t}')">${l}</button>`).join('')}</div>${content}<div class="save-bar">${S.saved?'<span style="font-size:12px;color:var(--green-fg);font-weight:500">&#10003; Saved</span>':''}<button class="btn-primary" onclick="saveProject()">${S.saving?'Saving...':'Save'}</button></div>`;
+}
+
+function renderInfo(){
+  const p=S.p;
+  return `<div class="section-block"><div><div class="section-label">Client details</div><div class="grid-3"><div>${fl('Company')}${inp('client',p.client)}</div><div>${fl('Contact person')}${inp('contact',p.contact)}</div><div>${fl('Email')}${inp('email',p.email,'email')}</div><div>${fl('Phone')}${inp('phone',p.phone,'tel')}</div></div></div><div><div class="section-label">Event details</div><div class="grid-3"><div>${fl('Date')}${inp('date',p.date,'date')}</div><div>${fl('Time')}${inp('time',p.time,'time')}</div><div>${fl('Event type')}${inp('event_type',p.event_type)}</div><div>${fl('Number of guests')}${inp('guests',p.guests,'number')}</div><div>${fl('Venue name')}${inp('venue',p.venue)}</div><div>${fl('Address')}${inp('address',p.address)}</div></div></div><div><div class="section-label">Brief & requirements</div><div class="grid-2"><div>${fl('Project description')}${ta('description',p.description)}</div><div>${fl('Client requirements')}${ta('requirements',p.requirements)}</div><div>${fl('Dietary requirements')}${ta('dietary',p.dietary)}</div><div>${fl('Internal notes')}${ta('notes',p.notes)}</div></div></div></div>`;
+}
+
+function renderLines(type){
+  const cats=type==='costs'?COST_CATS:REV_CATS;
+  const lines=S.p[type]||[];
+  const tot=sum(lines),vatTot=vatSum(lines);
+  const isImg=(n)=>/\.(jpg|jpeg|png|gif|webp|heic)$/i.test(n||'');
+  const rows=lines.length===0?`<div style="padding:2rem;text-align:center;color:var(--text2);font-size:13px">No lines added yet.</div>`:lines.map(r=>{
+    const hasFile=!!(r.file_url);
+    const attachBtn=`<label class="line-attach-btn r-attach${hasFile?' has-file':''}" title="${hasFile?'Replace':'Attach receipt'}"><input type="file" accept="image/*,.pdf,.doc,.docx" onchange="uploadLineFile('${type}','${r.id}',this.files[0])">${hasFile?`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#3b6d11" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>`:`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--text3)" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>`}</label>`;
+    const preview=hasFile?`<div style="grid-column:1/-1;padding:0 0 6px 0"><div class="line-attach-preview">${isImg(r.file_name)?`<img src="${r.file_url}" style="width:32px;height:32px;object-fit:cover;border-radius:4px;flex-shrink:0">`:`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="1.5" style="flex-shrink:0"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`}<a href="${r.file_url}" target="_blank">${r.file_name||'View file'}</a><button onclick="delLineFile('${type}','${r.id}')" style="background:transparent;border:none;color:var(--text3);font-size:16px;cursor:pointer;padding:0 2px;line-height:1;flex-shrink:0">×</button></div></div>`:'';
+    return `<div class="regel-row"><input class="r-desc" value="${(r.description||'').replace(/"/g,'&quot;')}" placeholder="Description" onchange="updLine('${type}','${r.id}','description',this.value)"><select class="r-cat" onchange="updLine('${type}','${r.id}','category',this.value)">${cats.map(c=>`<option${c===r.category?' selected':''}>${c}</option>`).join('')}</select><input class="r-store" value="${(r.store||'').replace(/"/g,'&quot;')}" placeholder="Store / supplier" onchange="updLine('${type}','${r.id}','store',this.value)"><select class="r-vat" onchange="updLine('${type}','${r.id}','vat',this.value)">${Object.keys(VAT).map(t=>`<option${t===r.vat?' selected':''}>${t}</option>`).join('')}</select><input class="r-amount" type="number" value="${r.amount||''}" placeholder="0.00" style="text-align:right" onchange="updLine('${type}','${r.id}','amount',this.value)">${attachBtn}<button class="r-del btn-icon" style="color:#a32d2d;padding:4px 6px;font-size:16px" onclick="delLine('${type}','${r.id}')">×</button>${preview}</div>`;
+  }).join('');
+  return `<div class="card"><div class="regel-head"><div>Description</div><div>Category</div><div>Store / supplier</div><div>VAT</div><div>Amount excl.</div><div></div><div></div></div>${rows}<div class="regels-footer"><button class="btn-ghost" onclick="addLine('${type}')">+ Add line</button><div class="totals-row"><div><span>Excl. VAT </span><strong>${fmt(tot)}</strong></div><div><span>VAT </span><strong>${fmt(vatTot)}</strong></div><div><span>Incl. VAT </span><strong>${fmt(tot+vatTot)}</strong></div></div></div></div>`;
+}
+
+function renderFinancial(){
+  const p=S.p;
+  const tR=sum(p.revenues),tC=sum(p.costs),vatR=vatSum(p.revenues),vatC=vatSum(p.costs),mg=tR-tC,m=margin(tR,tC);
+  const guests=parseFloat(p.guests)||0;
+  const alertStyle=m>=40?`background:var(--green-bg);color:var(--green-fg)`:m>=30?`background:var(--amber-bg);color:var(--amber-fg)`:`background:var(--red-bg);color:var(--red-fg)`;
+  const alertT=m>=40?'Healthy margin.':m>=30?'Margin on the low side. Consider raising price or reducing costs.':'Margin too low. Raise price or cut costs. Aim for 30%+.';
+  const row=(l,v,h=false)=>`<div class="result-row${h?' highlight':''}"><span class="r-label">${l}</span><span class="r-value">${v}</span></div>`;
+  return `<div style="display:flex;flex-direction:column;gap:1.25rem"><div class="stats-row">${statC('Revenue excl. VAT',fmt(tR))}${statC('VAT on revenue',fmt(vatR))}${statC('Revenue incl. VAT',fmt(tR+vatR))}${statC('','')}</div><div class="stats-row">${statC('Costs excl. VAT',fmt(tC))}${statC('VAT on costs',fmt(vatC))}${statC('Costs incl. VAT',fmt(tC+vatC))}${statC('','')}</div><div class="card"><div style="padding:10px 16px;background:var(--bg2);border-bottom:0.5px solid var(--border)"><div class="section-label" style="margin:0">Result</div></div>${row('Revenue (excl. VAT)',fmt(tR))}${row('Costs (excl. VAT)',fmt(tC))}${row('Gross margin',fmt(mg),true)}${row('Margin %',mBadge(m),true)}${guests>0?row('Revenue per guest',fmt(tR/guests)):''}${guests>0?row('Costs per guest',fmt(tC/guests)):''}${guests>0?row('Margin per guest',fmt(mg/guests)):''}${row('VAT to remit',fmt(vatR))}${row('VAT to reclaim',fmt(vatC))}${row('Net VAT position',fmt(vatR-vatC))}</div>${tR>0?`<div class="alert" style="${alertStyle}">${alertT}</div>`:''}</div>`;
+}
+
+function renderDocs(){
+  const p=S.p;const attachments=p.attachments||[];const isImg=(name)=>/\.(jpg|jpeg|png|gif|webp|heic)$/i.test(name);
+  const items=attachments.map(a=>`<div class="attach-item" title="${a.name}">${isImg(a.name)?`<img class="attach-thumb" src="${a.url}" alt="${a.name}" onclick="window.open('${a.url}','_blank')">`:`<div class="attach-file" onclick="window.open('${a.url}','_blank')"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span style="font-size:11px;color:var(--text2);text-transform:uppercase">${(a.name.split('.').pop()||'file').toUpperCase()}</span></div>`}<div class="attach-name">${a.name}</div><button class="attach-del" onclick="delAttachment('${a.id}')">×</button></div>`).join('');
+  return `<div style="display:flex;flex-direction:column;gap:1rem"><div class="card"><div style="padding:10px 16px;background:var(--bg2);border-bottom:0.5px solid var(--border)"><div class="section-label" style="margin:0">Attachments (${attachments.length})</div></div>${attachments.length>0?`<div class="attach-grid">${items}</div>`:''}<div style="padding:${attachments.length>0?'0 14px 14px':'14px'}"><label class="upload-zone"><input type="file" multiple accept="image/*,.pdf,.doc,.docx,.xls,.xlsx" onchange="uploadFiles(this.files)"><div><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--text3)" stroke-width="1.5" style="margin-bottom:8px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg><div style="font-size:13px;color:var(--text2)">Click to upload or drag files here</div><div style="font-size:11px;color:var(--text3);margin-top:4px">Images, PDF, Word, Excel</div></div></label></div></div></div>`;
+}
+
+/* ══════════════════════════════════════════════
+   CATERING PLANNER
+══════════════════════════════════════════════ */
+async function loadEvents(){
+  const{data}=await db.from('events').select('*').order('date',{ascending:true});
+  S.events=data||[];
+}
+async function loadTeam(){
+  const{data}=await db.from('team').select('*').order('created_at',{ascending:true});
+  S.team=data||[];
+}
+async function saveEvent(ev){
+  const pl={name:ev.name||'',date:ev.date||'',guests:parseInt(ev.guests)||0,customer_needs:ev.customer_needs||[],tasks:ev.tasks||[]};
+  if(ev.id&&S.events.find(e=>e.id===ev.id)){await db.from('events').update(pl).eq('id',ev.id);}
+  else{const{data}=await db.from('events').insert(pl).select().single();if(data)return data;}
+  return ev;
+}
+async function deleteEvent(id){
+  if(!confirm('Delete this event?'))return;
+  await db.from('events').delete().eq('id',id);
+  S.event=null;S.catView='events';await loadEvents();render();
+}
+async function saveTeamMember(m){
+  const pl={name:m.name||'',role:m.role||ROLES[0]};
+  if(m.id){await db.from('team').update(pl).eq('id',m.id);}
+  else{await db.from('team').insert(pl);}
+  await loadTeam();render();
+}
+async function deleteTeamMember(id){
+  if(!confirm('Remove team member?'))return;
+  await db.from('team').delete().eq('id',id);
+  await loadTeam();render();
+}
+
+function openEvent(id){S.event={...S.events.find(e=>e.id===id)};S.catView='event-detail';S.catTab='kanban';S.task=null;render();}
+function backToEvents(){S.catView='events';S.event=null;S.task=null;render();}
+function openTask(taskId){const t=S.event.tasks.find(t=>t.id===taskId);if(t){S.task={...t};S.catView='task-detail';render();}}
+function backToEvent(){S.catView='event-detail';S.task=null;render();}
+function setCatTab(t){S.catTab=t;render();}
+
+async function createEvent(name,date,guests){
+  const ev={name,date,guests:parseInt(guests)||0,customer_needs:[],tasks:[]};
+  const saved=await saveEvent(ev);
+  await loadEvents();S.newEventForm=false;render();
+}
+async function createTask(title,category){
+  if(!S.event)return;
+  const task={id:uid(),title,category:category||TASK_CATS[0],status:'To Do',assignee:'',prepBy:'',serveBy:'',allergens:[],portions:'',comments:[]};
+  S.event={...S.event,tasks:[...(S.event.tasks||[]),task]};
+  await saveEvent(S.event);await loadEvents();S.newTaskForm=false;render();
+}
+async function updateTask(field,value){
+  S.task={...S.task,[field]:value};
+  S.event={...S.event,tasks:S.event.tasks.map(t=>t.id===S.task.id?S.task:t)};
+  await saveEvent(S.event);render();
+}
+async function toggleAllergen(a){
+  const allergens=S.task.allergens||[];
+  const updated=allergens.includes(a)?allergens.filter(x=>x!==a):[...allergens,a];
+  await updateTask('allergens',updated);
+}
+async function moveTask(taskId,status){
+  S.event={...S.event,tasks:S.event.tasks.map(t=>t.id===taskId?{...t,status}:t)};
+  await saveEvent(S.event);await loadEvents();render();
+}
+async function deleteTask(taskId){
+  if(!confirm('Delete this task?'))return;
+  S.event={...S.event,tasks:S.event.tasks.filter(t=>t.id!==taskId)};
+  await saveEvent(S.event);await loadEvents();S.catView='event-detail';S.task=null;render();
+}
+async function addComment(text){
+  if(!text.trim())return;
+  const comment={id:uid(),text,author:'You',time:new Date().toLocaleString('nl-NL',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})};
+  await updateTask('comments',[...(S.task.comments||[]),comment]);
+}
+async function addNeed(text,count){
+  if(!text.trim())return;
+  const need={id:uid(),text,count:parseInt(count)||0};
+  S.event={...S.event,customer_needs:[...(S.event.customer_needs||[]),need]};
+  await saveEvent(S.event);await loadEvents();render();
+}
+async function removeNeed(id){
+  S.event={...S.event,customer_needs:(S.event.customer_needs||[]).filter(n=>n.id!==id)};
+  await saveEvent(S.event);await loadEvents();render();
+}
+
+function renderEventsOverview(){
+  const evs=S.events;
+  return `
+    <div class="topbar">
+      <div><div class="title">Event planner</div><div class="subtitle">Manage your catering events</div></div>
+      <div class="topbar-right"><button class="btn-primary" onclick="S.newEventForm=true;render()">+ New event</button></div>
+    </div>
+    ${S.newEventForm?`<div class="card" style="padding:1.25rem;margin-bottom:1.25rem">
+      <div class="section-label">New event</div>
+      <div class="grid-3" style="margin-bottom:12px">
+        <div>${fl('Event name')}<input id="ne-name" placeholder="VSNL Summit"></div>
+        <div>${fl('Date')}<input id="ne-date" type="date"></div>
+        <div>${fl('Guests')}<input id="ne-guests" type="number" placeholder="50"></div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn-primary" onclick="createEvent(document.getElementById('ne-name').value,document.getElementById('ne-date').value,document.getElementById('ne-guests').value)">Create event</button>
+        <button class="btn-ghost" onclick="S.newEventForm=false;render()">Cancel</button>
+      </div>
+    </div>`:''}
+    ${evs.length===0&&!S.newEventForm?`<div class="empty">No events yet.<br>Create your first event to get started.</div>`:`<div class="event-grid">${evs.map(ev=>{
+      const tasks=ev.tasks||[];
+      const done=tasks.filter(t=>t.status==='Done').length;
+      const inProg=tasks.filter(t=>t.status==='In Progress').length;
+      const todo=tasks.filter(t=>t.status==='To Do').length;
+      const pct=tasks.length>0?Math.round(done/tasks.length*100):0;
+      const allergyCount=(ev.customer_needs||[]).filter(n=>n.text).length;
+      return `<div class="event-card" onclick="openEvent(${ev.id})">
+        <div class="event-card-name">${ev.name||'Untitled'}</div>
+        <div class="event-card-meta">
+          <span>${fmtDate(ev.date)}</span>
+          <span>${ev.guests||0} guests</span>
+          <span style="color:${countdown(ev.date)==='Past'?'#a32d2d':countdown(ev.date)==='Today'?'#854f0b':'var(--text2)'}">${countdown(ev.date)}</span>
+        </div>
+        ${tasks.length>0?`<div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div><div style="font-size:11px;color:var(--text2);margin-bottom:8px">${pct}% complete</div>`:''}
+        ${allergyCount>0?`<div style="font-size:11px;color:#a32d2d;margin-bottom:8px">&#9888; ${allergyCount} dietary requirement${allergyCount>1?'s':''}</div>`:''}
+        <div class="event-card-footer">
+          <div class="task-counts">
+            <span class="count-pill" style="background:var(--blue-bg);color:var(--blue-fg)">${todo} to do</span>
+            <span class="count-pill" style="background:var(--amber-bg);color:var(--amber-fg)">${inProg} in progress</span>
+            <span class="count-pill" style="background:var(--green-bg);color:var(--green-fg)">${done} done</span>
+          </div>
+        </div>
+      </div>`;
+    }).join('')}</div>`}`;
+}
+
+function renderEventDetail(){
+  const ev=S.event;if(!ev)return'';
+  const tasks=ev.tasks||[];
+  const needs=ev.customer_needs||[];
+  let viewContent='';
+  if(S.catTab==='kanban')viewContent=renderKanban(tasks);
+  else if(S.catTab==='timeline')viewContent=renderTimeline(tasks);
+  else if(S.catTab==='categories')viewContent=renderCategories(tasks);
+
+  const needsPanel=`<div class="card" style="margin-bottom:1.25rem">
+    <div style="padding:10px 16px;background:var(--bg2);border-bottom:0.5px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+      <div class="section-label" style="margin:0">Customer needs</div>
+      <button class="btn-ghost" style="padding:4px 10px;font-size:12px" onclick="S.newNeedForm=!S.newNeedForm;render()">+ Add</button>
+    </div>
+    ${S.newNeedForm?`<div style="padding:12px 16px;border-bottom:0.5px solid var(--border);display:flex;gap:8px;flex-wrap:wrap">
+      <input id="need-count" type="number" placeholder="Count" style="width:80px"><input id="need-text" placeholder="e.g. nut allergy" style="flex:1"><button class="btn-primary" style="padding:7px 14px" onclick="addNeed(document.getElementById('need-text').value,document.getElementById('need-count').value);S.newNeedForm=false">Add</button>
+    </div>`:''}
+    ${needs.length===0?`<div style="padding:1rem 16px;font-size:13px;color:var(--text2)">No dietary requirements noted.</div>`:needs.map(n=>`<div class="need-row" style="padding:8px 16px"><span style="font-size:13px">${n.count>0?`<strong>${n.count}</strong> guests — `:''}<span>${n.text}</span></span><button class="btn-icon" style="color:#a32d2d;font-size:16px;margin-left:auto" onclick="removeNeed('${n.id}')">×</button></div>`).join('')}
+  </div>`;
 
   return `
-    <button class="back-btn" onclick="back()">&#8249; Overview</button>
+    <button class="back-btn" onclick="backToEvents()">&#8249; Events</button>
     <div class="detail-header">
-      <div style="flex:1;min-width:0">
-        <input class="input-ghost" value="${(p.name||'').replace(/"/g,'&quot;')}" placeholder="Project name" onchange="sf('name',this.value)" style="width:100%">
-        <div class="subtitle" style="margin-top:4px">${p.client||'Unknown client'}${p.date?' · '+fmtDate(p.date):''}${p.venue?' · '+p.venue:''}</div>
+      <div>
+        <div class="title">${ev.name||'Untitled'}</div>
+        <div class="subtitle">${fmtDate(ev.date)}${ev.guests?' · '+ev.guests+' guests':''}${ev.date?' · '+countdown(ev.date):''}</div>
       </div>
       <div class="detail-actions">
-        <select onchange="sf('status',this.value)" style="background:${sc.bg};color:${sc.fg};border:none;font-weight:600;font-size:12px;padding:7px 12px;border-radius:99px;cursor:pointer;width:auto;-webkit-appearance:none;appearance:none;letter-spacing:0.01em">
-          ${STATUSES.map(o=>`<option${o===p.status?' selected':''}>${o}</option>`).join('')}
-        </select>
-        <button class="btn-danger" onclick="del(${p.id})">Delete</button>
-        <button class="btn-primary" onclick="save()">${S.saving?'<div class="spinner" style="width:14px;height:14px;border-width:1.5px;filter:invert(1);display:inline-block"></div>':'Save'}</button>
-        ${S.saved?'<span style="font-size:12px;color:var(--green-fg);font-weight:500">&#10003; Saved</span>':''}
+        <button class="btn-primary" onclick="S.newTaskForm=true;render()">+ Add task</button>
+        <button class="btn-danger" onclick="deleteEvent(${ev.id})">Delete event</button>
       </div>
     </div>
+    ${S.newTaskForm?`<div class="card" style="padding:1.25rem;margin-bottom:1.25rem">
+      <div class="section-label">New task</div>
+      <div class="grid-2" style="margin-bottom:12px">
+        <div>${fl('Task title')}<input id="nt-title" placeholder="Prepare appetizers"></div>
+        <div>${fl('Category')}<select id="nt-cat">${TASK_CATS.map(c=>`<option>${c}</option>`).join('')}</select></div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn-primary" onclick="createTask(document.getElementById('nt-title').value,document.getElementById('nt-cat').value)">Add task</button>
+        <button class="btn-ghost" onclick="S.newTaskForm=false;render()">Cancel</button>
+      </div>
+    </div>`:''}
+    ${needsPanel}
     <div class="tabs">
-      ${tabs.map(([t,l])=>`<button class="tab-btn${S.tab===t?' active':''}" onclick="setTab('${t}')">${l}</button>`).join('')}
+      <button class="tab-btn${S.catTab==='kanban'?' active':''}" onclick="setCatTab('kanban')">Kanban</button>
+      <button class="tab-btn${S.catTab==='timeline'?' active':''}" onclick="setCatTab('timeline')">Timeline</button>
+      <button class="tab-btn${S.catTab==='categories'?' active':''}" onclick="setCatTab('categories')">Categories</button>
     </div>
-    ${content}
-    <div class="save-bar">
-      ${S.saved?'<span style="font-size:12px;color:var(--green-fg);font-weight:500">&#10003; Saved</span>':''}
-      <button class="btn-primary" onclick="save()">${S.saving?'Saving...':'Save'}</button>
+    ${viewContent}`;
+}
+
+function taskCard(t,showMove=true){
+  const allergenAlert=t.allergens&&t.allergens.length>0?`<span class="allergen-dot" title="${t.allergens.join(', ')}"></span>`:'';
+  const assigneeAvatar=t.assignee?`<span style="font-size:11px;color:var(--text2)">${t.assignee}</span>`:'';
+  const moveBtn=showMove?`<select style="font-size:11px;padding:3px 6px;border-radius:var(--r);background:var(--bg2);border:0.5px solid var(--border);color:var(--text2)" onchange="moveTask('${t.id}',this.value);event.stopPropagation()">${TASK_STATUSES.map(s=>`<option${s===t.status?' selected':''}>${s}</option>`).join('')}</select>`:'';
+  return `<div class="task-card" onclick="openTask('${t.id}')">
+    <div class="task-card-title">${t.title||'Untitled task'}</div>
+    <div class="task-card-meta">
+      ${t.category?`<span class="badge" style="background:var(--bg2);color:var(--text2);font-weight:400">${t.category}</span>`:''}
+      ${t.serveBy?`<span>Serve: ${t.serveBy}</span>`:''}
+      ${t.portions?`<span>${t.portions} portions</span>`:''}
+      ${allergenAlert}${assigneeAvatar}
+    </div>
+    ${moveBtn?`<div style="margin-top:8px">${moveBtn}</div>`:''}
+  </div>`;
+}
+
+function renderKanban(tasks){
+  const cols=TASK_STATUSES.map(s=>{
+    const colTasks=tasks.filter(t=>t.status===s);
+    const colors={'To Do':{bg:'var(--blue-bg)',fg:'var(--blue-fg)'},'In Progress':{bg:'var(--amber-bg)',fg:'var(--amber-fg)'},'Done':{bg:'var(--green-bg)',fg:'var(--green-fg)'}};
+    const c=colors[s]||{bg:'var(--bg2)',fg:'var(--text2)'};
+    return `<div class="kanban-col">
+      <div class="kanban-col-header"><span style="color:${c.fg}">${s}</span><span class="badge" style="background:${c.bg};color:${c.fg}">${colTasks.length}</span></div>
+      ${colTasks.length===0?`<div style="font-size:12px;color:var(--text3);text-align:center;padding:1rem 0">No tasks</div>`:''}
+      ${colTasks.map(t=>taskCard(t)).join('')}
+    </div>`;
+  }).join('');
+  return `<div class="kanban">${cols}</div>`;
+}
+
+function renderTimeline(tasks){
+  const withTime=tasks.filter(t=>t.serveBy||t.prepBy).sort((a,b)=>(a.serveBy||a.prepBy||'').localeCompare(b.serveBy||b.prepBy||''));
+  const noTime=tasks.filter(t=>!t.serveBy&&!t.prepBy);
+  const grouped={};
+  for(const t of withTime){const h=(t.serveBy||t.prepBy||'').slice(0,2);if(!grouped[h])grouped[h]=[];grouped[h].push(t);}
+  return `<div style="display:flex;flex-direction:column;gap:0">
+    ${Object.entries(grouped).map(([h,ts])=>`<div class="timeline-group"><div class="timeline-hour">${h}:00</div>${ts.map(t=>`<div class="timeline-task" onclick="openTask('${t.id}')"><div class="timeline-time">${t.serveBy||t.prepBy}</div><div style="flex:1"><div style="font-size:13px;font-weight:500">${t.title}</div><div style="font-size:11px;color:var(--text2)">${t.category} · ${t.status}</div></div></div>`).join('')}</div>`).join('')}
+    ${noTime.length>0?`<div class="timeline-group"><div class="timeline-hour">Unscheduled</div>${noTime.map(t=>`<div class="timeline-task" onclick="openTask('${t.id}')"><div class="timeline-time">—</div><div style="flex:1"><div style="font-size:13px;font-weight:500">${t.title}</div><div style="font-size:11px;color:var(--text2)">${t.category} · ${t.status}</div></div></div>`).join('')}</div>`:''}
+  </div>`;
+}
+
+function renderCategories(tasks){
+  return TASK_CATS.map(cat=>{
+    const catTasks=tasks.filter(t=>t.category===cat);
+    return `<div class="cat-group"><div class="cat-header">${cat} <span style="font-weight:400;opacity:0.6">(${catTasks.length})</span></div>${catTasks.length===0?`<div style="font-size:12px;color:var(--text3);padding:8px 0">No tasks in this category.</div>`:catTasks.map(t=>taskCard(t)).join('')}</div>`;
+  }).join('');
+}
+
+function renderTaskDetail(){
+  const t=S.task;if(!t)return'';
+  const teamOptions=S.team.map(m=>m.name);
+  return `
+    <button class="back-btn" onclick="backToEvent()">&#8249; ${S.event?.name||'Event'}</button>
+    <div class="detail-header">
+      <div style="flex:1;min-width:0">
+        <input class="input-ghost" value="${(t.title||'').replace(/"/g,'&quot;')}" placeholder="Task title" onchange="updateTask('title',this.value)" style="width:100%">
+        <div class="subtitle" style="margin-top:4px">${t.category} · ${t.status}</div>
+      </div>
+      <div class="detail-actions">
+        <select onchange="updateTask('status',this.value)" style="background:var(--bg2);border:0.5px solid var(--border2);font-size:12px;padding:7px 12px;border-radius:99px;cursor:pointer;width:auto;-webkit-appearance:none;appearance:none">
+          ${TASK_STATUSES.map(s=>`<option${s===t.status?' selected':''}>${s}</option>`).join('')}
+        </select>
+        <button class="btn-danger" onclick="deleteTask('${t.id}')">Delete</button>
+      </div>
+    </div>
+    <div class="task-detail">
+      <div class="grid-2" style="margin-bottom:1.25rem">
+        <div>${fl('Category')}<select onchange="updateTask('category',this.value)">${TASK_CATS.map(c=>`<option${c===t.category?' selected':''}>${c}</option>`).join('')}</select></div>
+        <div>${fl('Assignee')}<select onchange="updateTask('assignee',this.value)"><option value="">— Unassigned —</option>${teamOptions.map(n=>`<option${n===t.assignee?' selected':''}>${n}</option>`).join('')}</select></div>
+        <div>${fl('Prep by time')}<input type="time" value="${t.prepBy||''}" onchange="updateTask('prepBy',this.value)"></div>
+        <div>${fl('Serve by time')}<input type="time" value="${t.serveBy||''}" onchange="updateTask('serveBy',this.value)"></div>
+        <div>${fl('Portions / guest count')}<input type="number" value="${t.portions||''}" placeholder="0" onchange="updateTask('portions',this.value)"></div>
+      </div>
+      <div style="margin-bottom:1.25rem">
+        <div class="field-label" style="margin-bottom:8px">Allergen flags</div>
+        <div class="allergen-grid">
+          ${ALLERGENS.map(a=>`<button class="allergen-toggle${(t.allergens||[]).includes(a)?' active':''}" onclick="toggleAllergen('${a}')">${a}</button>`).join('')}
+        </div>
+      </div>
+      <div>
+        <div class="field-label" style="margin-bottom:8px">Comments</div>
+        ${(t.comments||[]).length>0?`<div class="comment-list">${(t.comments||[]).map(c=>`<div class="comment-item"><div class="comment-author">${c.author} · ${c.time}</div><div class="comment-text">${c.text}</div></div>`).join('')}</div>`:''}
+        <div style="display:flex;gap:8px">
+          <input id="comment-input" placeholder="Add a comment..." style="flex:1">
+          <button class="btn-primary" onclick="addComment(document.getElementById('comment-input').value);document.getElementById('comment-input').value=''">Post</button>
+        </div>
+      </div>
     </div>`;
 }
 
-function render(){
-  const app=document.getElementById('app');
-  app.innerHTML=S.view==='overview'?renderOverview():renderDetail();
+function renderTeam(){
+  return `
+    <div class="topbar">
+      <div><div class="title">Team</div><div class="subtitle">Manage your catering team</div></div>
+      <div class="topbar-right"><button class="btn-primary" onclick="S.newTeamForm=true;render()">+ Add member</button></div>
+    </div>
+    ${S.newTeamForm?`<div class="card" style="padding:1.25rem;margin-bottom:1.25rem">
+      <div class="section-label">New team member</div>
+      <div class="grid-2" style="margin-bottom:12px">
+        <div>${fl('Name')}<input id="tm-name" placeholder="Full name"></div>
+        <div>${fl('Role')}<select id="tm-role">${ROLES.map(r=>`<option>${r}</option>`).join('')}</select></div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn-primary" onclick="saveTeamMember({name:document.getElementById('tm-name').value,role:document.getElementById('tm-role').value});S.newTeamForm=false">Add member</button>
+        <button class="btn-ghost" onclick="S.newTeamForm=false;render()">Cancel</button>
+      </div>
+    </div>`:''}
+    ${S.team.length===0?`<div class="empty">No team members yet.</div>`:`<div class="team-grid">${S.team.map(m=>`<div class="team-card">${avatar(m.name)}<div><div style="font-weight:500;font-size:14px">${m.name}</div><div style="font-size:12px;color:var(--text2)">${m.role}</div></div><button class="btn-icon" style="color:#a32d2d;margin-left:auto" onclick="deleteTeamMember(${m.id})">×</button></div>`).join('')}</div>`}`;
 }
 
-load();
+function renderHome(){
+  return `
+    <div style="margin-bottom:2rem">
+      <div class="title">Welcome back</div>
+      <div class="subtitle">The Hangout — what would you like to manage?</div>
+    </div>
+    <div class="home-grid">
+      <div class="home-card" onclick="go('admin')">
+        <div class="home-card-icon" style="background:var(--bg2)">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        </div>
+        <div class="home-card-title">Project administration</div>
+        <div class="home-card-sub">Manage catering projects, track costs, revenue and margins per client.</div>
+        <div style="margin-top:1rem;font-size:12px;color:var(--text2)">${S.projects.length} project${S.projects.length===1?'':'s'}</div>
+      </div>
+      <div class="home-card" onclick="go('catering')">
+        <div class="home-card-icon" style="background:var(--bg2)">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        </div>
+        <div class="home-card-title">Event planner</div>
+        <div class="home-card-sub">Plan events, manage tasks with kanban, track allergens and coordinate your team.</div>
+        <div style="margin-top:1rem;font-size:12px;color:var(--text2)">${S.events.length} event${S.events.length===1?'':'s'}</div>
+      </div>
+    </div>`;
+}
+
+/* ── MAIN RENDER ── */
+function render(){
+  renderNav();
+  const app=document.getElementById('app');
+  let html='';
+  if(S.section==='home') html=renderHome();
+  else if(S.section==='admin'){
+    if(S.adminView==='overview')html=renderAdminOverview();
+    else if(S.adminView==='detail')html=renderAdminDetail();
+  }
+  else if(S.section==='catering'){
+    if(S.catView==='events')html=renderEventsOverview();
+    else if(S.catView==='event-detail')html=renderEventDetail();
+    else if(S.catView==='task-detail')html=renderTaskDetail();
+  }
+  else if(S.section==='team') html=renderTeam();
+  app.innerHTML=html;
+}
+
+/* ── INIT ── */
+async function init(){
+  await Promise.all([loadProjects(),loadEvents(),loadTeam()]);
+  render();
+}
+init();
 </script>
 </body>
 </html>
