@@ -159,6 +159,7 @@ const SC = {
 let S = { view:'overview', projects:[], p:null, tab:'info', saving:false, saved:false };
 
 const fmt = (n) => '€\u202f'+Number(n||0).toLocaleString('nl-NL',{minimumFractionDigits:2,maximumFractionDigits:2});
+const fmtDate = (d) => { if(!d)return'—'; const [y,m,day]=d.split('-'); return day&&m&&y?`${day}-${m}-${y}`:d; };
 const sum = (a) => (a||[]).reduce((t,r)=>t+(parseFloat(r.amount)||0),0);
 const vatSum = (a) => (a||[]).reduce((t,r)=>t+(parseFloat(r.amount)||0)*(VAT[r.vat]||0),0);
 const margin = (rev,cost) => rev>0?((rev-cost)/rev)*100:0;
@@ -228,14 +229,14 @@ function renderOverview(){
           return `<div class="tbl-row" style="grid-template-columns:2fr 1.4fr 85px 55px 100px 90px 80px 110px" onclick="openP(${p.id})">
             <div style="font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" data-col="name">${p.name||'Untitled'}</div>
             <div style="color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap" data-col="client">${p.client||'—'}</div>
-            <div style="color:var(--text2)" data-col="date">${p.date||'—'}</div>
+            <div style="color:var(--text2)" data-col="date">${fmtDate(p.date)}</div>
             <div style="color:var(--text2)" data-col="guests">${p.guests||'—'}</div>
             <div class="mobile-card">
               <div class="mc-name">${p.name||'Untitled'}</div>
               <div class="mc-meta">
                 ${sBadge(p.status)}
                 <span style="font-size:12px;color:var(--text2)">${p.client||''}</span>
-                <span style="font-size:12px;color:var(--text2)">${p.date||''}</span>
+                <span style="font-size:12px;color:var(--text2)">${fmtDate(p.date)}</span>
               </div>
               <div class="mc-amounts">
                 <span style="font-size:13px">${fmt(rv)}</span>
@@ -506,7 +507,7 @@ function renderDetail(){
     <div class="detail-header">
       <div style="flex:1;min-width:0">
         <input class="input-ghost" value="${(p.name||'').replace(/"/g,'&quot;')}" placeholder="Project name" onchange="sf('name',this.value)" style="width:100%">
-        <div class="subtitle" style="margin-top:4px">${p.client||'Unknown client'}${p.date?' · '+p.date:''}${p.venue?' · '+p.venue:''}</div>
+        <div class="subtitle" style="margin-top:4px">${p.client||'Unknown client'}${p.date?' · '+fmtDate(p.date):''}${p.venue?' · '+p.venue:''}</div>
       </div>
       <div class="detail-actions">
         <select onchange="sf('status',this.value)" style="background:${sc.bg};color:${sc.fg};border:none;font-weight:600;font-size:12px;padding:7px 12px;border-radius:99px;cursor:pointer;width:auto;-webkit-appearance:none;appearance:none;letter-spacing:0.01em">
@@ -536,4 +537,3 @@ load();
 </script>
 </body>
 </html>
-
