@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Hangout Admin">
+<title>The Hangout – Project Admin</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#ffffff;--bg2:#f7f6f3;--bg3:#f0efe9;
+  --text:#1a1a18;--text2:#6b6a65;--text3:#9b9a96;
+  --border:rgba(0,0,0,0.09);--border2:rgba(0,0,0,0.16);
+  --green-bg:#eaf3de;--green-fg:#27500a;
+  --amber-bg:#faeeda;--amber-fg:#633806;
+  --red-bg:#fcebeb;--red-fg:#791f1f;
+  --blue-bg:#e6f1fb;--blue-fg:#0c447c;
+  --r:10px;--r-lg:14px;
+  --shadow:0 1px 3px rgba(0,0,0,0.08),0 1px 2px rgba(0,0,0,0.05);
+}
+html{-webkit-text-size-adjust:100%}
+body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',sans-serif;background:var(--bg3);color:var(--text);font-size:14px;line-height:1.5;min-height:100vh;padding-bottom:env(safe-area-inset-bottom)}
+.page{max-width:980px;margin:0 auto;padding:1.5rem}
+@media(max-width:600px){.page{padding:1rem 0.875rem}}
+.title{font-size:22px;font-weight:600;letter-spacing:-0.025em}
+.subtitle{font-size:13px;color:var(--text2);margin-top:2px}
+.section-label{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px}
+.field-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px}
+.card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow)}
+.stat-card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--r-lg);padding:14px 16px;box-shadow:var(--shadow)}
+.stat-card.muted{background:var(--bg2);border-color:transparent;box-shadow:none}
+.stat-label{font-size:11px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px}
+.stat-value{font-size:21px;font-weight:600;line-height:1;letter-spacing:-0.02em}
+.stat-sub{font-size:12px;color:var(--text2);margin-top:4px}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.25rem}
+@media(max-width:600px){.stats-row{grid-template-columns:repeat(2,1fr)}}
+button{font-family:inherit;cursor:pointer;border-radius:var(--r);font-size:13px;transition:all 0.15s;-webkit-tap-highlight-color:transparent}
+button:hover{opacity:0.85}
+.btn-primary{background:var(--text);color:#fff;border:none;padding:9px 18px;font-weight:500;letter-spacing:-0.01em}
+.btn-primary:active{opacity:0.8;transform:scale(0.98)}
+.btn-ghost{background:var(--bg);border:0.5px solid var(--border2);color:var(--text);padding:8px 14px}
+.btn-ghost:active{background:var(--bg2)}
+.btn-danger{background:transparent;border:0.5px solid rgba(226,75,74,0.4);color:#a32d2d;padding:7px 12px;font-size:12px}
+.btn-icon{background:transparent;border:none;color:var(--text2);padding:6px;font-size:18px;line-height:1;border-radius:var(--r)}
+input,select,textarea{font-family:inherit;font-size:14px;color:var(--text);background:var(--bg2);border:0.5px solid transparent;border-radius:var(--r);padding:10px 12px;width:100%;outline:none;-webkit-appearance:none;appearance:none;transition:border-color 0.15s,background 0.15s}
+input:focus,select:focus,textarea:focus{background:var(--bg);border-color:var(--border2);box-shadow:0 0 0 3px rgba(0,0,0,0.05)}
+textarea{resize:vertical;min-height:88px;line-height:1.6}
+.input-ghost{background:transparent;border:none;padding:0;font-size:22px;font-weight:600;letter-spacing:-0.025em;border-radius:0}
+.input-ghost:focus{background:transparent;border:none;box-shadow:none;border-bottom:1.5px solid var(--border2)}
+.badge{display:inline-block;font-size:11px;font-weight:600;padding:3px 9px;border-radius:99px;white-space:nowrap;letter-spacing:0.01em}
+.tbl-head{display:grid;background:var(--bg2);border-bottom:0.5px solid var(--border);padding:9px 16px;gap:10px}
+.tbl-head>div{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em}
+.tbl-row{display:grid;padding:13px 16px;gap:10px;align-items:center;border-bottom:0.5px solid var(--border);cursor:pointer;transition:background 0.1s}
+.tbl-row:last-child{border-bottom:none}
+.tbl-row:hover{background:var(--bg2)}
+.tbl-row:active{background:var(--bg3)}
+@media(max-width:640px){
+  .tbl-head{display:none}
+  .tbl-row{display:flex;flex-direction:column;padding:14px 16px;gap:6px;align-items:flex-start}
+  .tbl-row [data-col]{display:none}
+  .mobile-card{display:flex !important}
+}
+.mobile-card{display:none;flex-direction:column;gap:5px;width:100%}
+.mobile-card .mc-name{font-size:15px;font-weight:600}
+.mobile-card .mc-meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.mobile-card .mc-amounts{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:2px}
+.tabs{display:flex;border-bottom:0.5px solid var(--border);margin-bottom:1.5rem;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab-btn{background:transparent;border:none;border-bottom:2px solid transparent;padding:10px 16px;font-size:13px;color:var(--text2);white-space:nowrap;margin-bottom:-1px;flex-shrink:0}
+.tab-btn.active{color:var(--text);border-bottom-color:var(--text);font-weight:600}
+.regel-head{display:grid;grid-template-columns:2fr 1.2fr 1fr 68px 100px 36px 36px;background:var(--bg2);border-bottom:0.5px solid var(--border);padding:9px 14px;gap:8px}
+.regel-head>div{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em}
+.regel-row{display:grid;grid-template-columns:2fr 1.2fr 1fr 68px 100px 36px 36px;padding:9px 14px;gap:8px;align-items:center;border-bottom:0.5px solid var(--border)}
+.regel-row:last-child{border-bottom:none}
+.line-attach-btn{background:transparent;border:0.5px solid var(--border2);border-radius:var(--r);width:32px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;flex-shrink:0;transition:background 0.15s}
+.line-attach-btn:hover{background:var(--bg2)}
+.line-attach-btn.has-file{border-color:#3b6d11;background:var(--green-bg)}
+.line-attach-btn input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.line-attach-preview{display:flex;align-items:center;gap:8px;margin-top:6px;padding:6px 10px;background:var(--bg2);border-radius:var(--r);font-size:12px;color:var(--text2)}
+.line-attach-preview a{color:var(--text);font-weight:500;text-decoration:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.line-attach-preview a:hover{text-decoration:underline}
+@media(max-width:700px){
+  .regel-head{display:none}
+  .regel-row{display:grid;grid-template-columns:1fr auto auto;grid-template-rows:auto auto auto auto;padding:14px;gap:8px}
+  .regel-row .r-desc{grid-column:1;grid-row:1}
+  .regel-row .r-attach{grid-column:2;grid-row:1}
+  .regel-row .r-del{grid-column:3;grid-row:1;justify-self:end}
+  .regel-row .r-cat{grid-column:1/4;grid-row:2}
+  .regel-row .r-store{grid-column:1/4;grid-row:3}
+  .regel-row .r-vat{grid-column:1;grid-row:4}
+  .regel-row .r-amount{grid-column:2/4;grid-row:4}
+}
+.attach-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;padding:14px}
+.attach-item{border:0.5px solid var(--border);border-radius:var(--r);overflow:hidden;position:relative;cursor:pointer}
+.attach-item:hover .attach-del{opacity:1}
+.attach-thumb{width:100%;height:100px;object-fit:cover;display:block;background:var(--bg2)}
+.attach-file{width:100%;height:100px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--bg2);gap:6px}
+.attach-name{padding:7px 8px;font-size:11px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-top:0.5px solid var(--border);background:var(--bg)}
+.attach-del{position:absolute;top:5px;right:5px;background:rgba(0,0,0,0.55);color:#fff;border:none;border-radius:50%;width:22px;height:22px;font-size:14px;line-height:1;opacity:0;transition:opacity 0.15s;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.upload-zone{border:1.5px dashed var(--border2);border-radius:var(--r-lg);padding:2.5rem;text-align:center;cursor:pointer;transition:background 0.15s}
+.upload-zone:hover{background:var(--bg2)}
+.upload-zone input{display:none}
+.result-row{display:flex;justify-content:space-between;align-items:center;padding:11px 16px;border-bottom:0.5px solid var(--border)}
+.result-row:last-child{border-bottom:none}
+.result-row.highlight{background:var(--bg2)}
+.result-row .r-label{font-size:13px;color:var(--text2)}
+.result-row .r-value{font-size:13px;font-weight:500}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:700px){.grid-3{grid-template-columns:1fr 1fr}}
+@media(max-width:480px){.grid-3,.grid-2{grid-template-columns:1fr}}
+hr{border:none;border-top:0.5px solid var(--border);margin:1.5rem 0}
+.alert{padding:12px 16px;border-radius:var(--r);font-size:13px;line-height:1.5}
+.spinner{display:inline-block;width:17px;height:17px;border:2px solid var(--border2);border-top-color:var(--text);border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty{text-align:center;padding:4rem 2rem;color:var(--text2);border:0.5px dashed var(--border2);border-radius:var(--r-lg);font-size:14px;line-height:1.8}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;gap:12px}
+.topbar-right{display:flex;gap:8px;align-items:center;flex-shrink:0}
+.detail-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.25rem;gap:12px;flex-wrap:wrap}
+.detail-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;flex-shrink:0}
+.section-block{display:flex;flex-direction:column;gap:1.5rem}
+.regels-footer{padding:11px 14px;border-top:0.5px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.totals-row{display:flex;gap:16px;font-size:13px;flex-wrap:wrap}
+.totals-row span{color:var(--text2)}
+.totals-row strong{color:var(--text);font-weight:600}
+.save-bar{display:flex;justify-content:flex-end;gap:8px;align-items:center;padding-top:1.25rem;border-top:0.5px solid var(--border);margin-top:1.5rem}
+.back-btn{display:flex;align-items:center;gap:4px;background:transparent;border:none;color:var(--text2);font-size:14px;padding:4px 0;margin-bottom:1rem;cursor:pointer}
+</style>
+</head>
+<body>
+<div class="page" id="app">
+  <div style="display:flex;align-items:center;gap:10px;padding:3rem 0;color:var(--text2)">
+    <div class="spinner"></div><span style="font-size:14px;margin-left:4px">Connecting...</span>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://qzmedbjyfirmxcvjbjit.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6bWVkYmp5ZmlybXhjdmpiaml0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYyNDIyOTksImV4cCI6MjA5MTgxODI5OX0.qNDk_eL_oiBJFHgm-XhF1p2jdp96F29oF4OjLFYu1_Q';
+
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const COST_CATS = ['Ingredients','Staff','Transport','Equipment/Rental','Other'];
+const REV_CATS = ['Catering','Drinks package','Staff (charged)','Equipment (charged)','Other'];
+const VAT = {'9%':0.09,'21%':0.21,'0%':0};
+const STATUSES = ['Quote sent','Confirmed','In progress','Completed','Cancelled'];
+const SC = {
+  'Quote sent':{bg:'#e6f1fb',fg:'#185fa5'},
+  'Confirmed':{bg:'#eaf3de',fg:'#3b6d11'},
+  'In progress':{bg:'#faeeda',fg:'#854f0b'},
+  'Completed':{bg:'#d4f0e4',fg:'#0f6e56'},
+  'Cancelled':{bg:'#fcebeb',fg:'#a32d2d'},
+};
+
+let S = { view:'overview', projects:[], p:null, tab:'info', saving:false, saved:false };
+
+const fmt = (n) => '€\u202f'+Number(n||0).toLocaleString('nl-NL',{minimumFractionDigits:2,maximumFractionDigits:2});
+const sum = (a) => (a||[]).reduce((t,r)=>t+(parseFloat(r.amount)||0),0);
+const vatSum = (a) => (a||[]).reduce((t,r)=>t+(parseFloat(r.amount)||0)*(VAT[r.vat]||0),0);
+const margin = (rev,cost) => rev>0?((rev-cost)/rev)*100:0;
+
+function mBadge(pct){
+  const p=parseFloat(pct)||0,c=p>=40?{bg:'#eaf3de',fg:'#3b6d11'}:p>=30?{bg:'#faeeda',fg:'#854f0b'}:{bg:'#fcebeb',fg:'#a32d2d'};
+  return `<span class="badge" style="background:${c.bg};color:${c.fg}">${p.toFixed(1)}%</span>`;
+}
+function sBadge(s){
+  const c=SC[s]||SC['Quote sent'];
+  return `<span class="badge" style="background:${c.bg};color:${c.fg}">${s||'—'}</span>`;
+}
+function statC(label,val,sub='',accent=false){
+  return `<div class="stat-card${accent?'':' muted'}"><div class="stat-label">${label}</div><div class="stat-value">${val}</div>${sub?`<div class="stat-sub">${sub}</div>`:''}</div>`;
+}
+function fl(t){return `<div class="field-label">${t}</div>`;}
+function inp(k,v,t='text',ph=''){return `<input type="${t}" value="${(v||'').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}" placeholder="${ph}" onchange="sf('${k}',this.value)">`;}
+function sel(k,v,opts){return `<select onchange="sf('${k}',this.value)">${opts.map(o=>`<option${o===v?' selected':''}>${o}</option>`).join('')}</select>`;}
+function ta(k,v){return `<textarea onchange="sf('${k}',this.value)">${(v||'').replace(/</g,'&lt;')}</textarea>`;}
+
+async function load(){
+  const {data,error}=await db.from('projects').select('*').order('created_at',{ascending:false});
+  if(error){document.getElementById('app').innerHTML=`<div style="padding:2rem;color:#a32d2d;font-size:14px">Connection error: ${error.message}<br><br>Make sure your Supabase URL and key are set correctly.</div>`;return;}
+  S.projects=data||[];render();
+}
+async function save(){
+  S.saving=true;render();
+  const p=S.p;
+  const pl={name:p.name||'',client:p.client||'',contact:p.contact||'',email:p.email||'',phone:p.phone||'',date:p.date||'',time:p.time||'',venue:p.venue||'',address:p.address||'',event_type:p.event_type||'',guests:p.guests||'',status:p.status||'Quote sent',description:p.description||'',requirements:p.requirements||'',dietary:p.dietary||'',notes:p.notes||'',costs:p.costs||[],revenues:p.revenues||[],attachments:p.attachments||[]};
+  if(p.id&&S.projects.find(x=>x.id===p.id)){await db.from('projects').update(pl).eq('id',p.id);}
+  else{const{data}=await db.from('projects').insert(pl).select().single();if(data)S.p={...S.p,id:data.id};}
+  await load();
+  S.p=S.projects.find(x=>x.id===S.p?.id)||S.p;
+  S.saving=false;S.saved=true;render();
+  setTimeout(()=>{S.saved=false;render();},2200);
+}
+async function del(id){
+  if(!confirm('Delete this project? This cannot be undone.'))return;
+  await db.from('projects').delete().eq('id',id);
+  S.view='overview';S.p=null;await load();
+}
+
+function sf(k,v){S.p={...S.p,[k]:v};render();}
+function addLine(t){const r={id:Date.now(),description:'',amount:'',category:t==='costs'?COST_CATS[0]:REV_CATS[0],vat:t==='costs'?'21%':'9%'};sf(t,[...(S.p[t]||[]),r]);}
+function updLine(t,id,k,v){sf(t,S.p[t].map(r=>r.id===id?{...r,[k]:v}:r));}
+function delLine(t,id){sf(t,S.p[t].filter(r=>r.id!==id));}
+function openP(id){S.p={...S.projects.find(p=>p.id===id)};S.tab='info';S.view='detail';render();}
+function newP(){S.p={name:'',client:'',contact:'',email:'',phone:'',date:'',time:'',venue:'',address:'',event_type:'',guests:'',status:'Quote sent',description:'',requirements:'',dietary:'',notes:'',costs:[],revenues:[],attachments:[]};S.tab='info';S.view='detail';render();}
+function back(){S.view='overview';S.p=null;render();}
+function setTab(t){S.tab=t;render();}
+
+function renderOverview(){
+  const ps=S.projects;
+  const tR=ps.reduce((a,p)=>a+sum(p.revenues),0);
+  const tC=ps.reduce((a,p)=>a+sum(p.costs),0);
+  const tM=tR-tC,tP=tR>0?(tM/tR)*100:0;
+  const active=ps.filter(p=>['Confirmed','In progress'].includes(p.status)).length;
+
+  const rows=ps.length===0
+    ?`<div class="empty">No projects yet.<br>Tap "+ New project" to get started.</div>`
+    :`<div class="card">
+        <div class="tbl-head" style="grid-template-columns:2fr 1.4fr 85px 55px 100px 90px 80px 110px">
+          <div>Project</div><div>Client</div><div>Date</div><div>Guests</div><div>Revenue</div><div>Costs</div><div>Margin</div><div>Status</div>
+        </div>
+        ${ps.map(p=>{
+          const rv=sum(p.revenues),co=sum(p.costs),m=margin(rv,co);
+          return `<div class="tbl-row" style="grid-template-columns:2fr 1.4fr 85px 55px 100px 90px 80px 110px" onclick="openP(${p.id})">
+            <div style="font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" data-col="name">${p.name||'Untitled'}</div>
+            <div style="color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap" data-col="client">${p.client||'—'}</div>
+            <div style="color:var(--text2)" data-col="date">${p.date||'—'}</div>
+            <div style="color:var(--text2)" data-col="guests">${p.guests||'—'}</div>
+            <div class="mobile-card">
+              <div class="mc-name">${p.name||'Untitled'}</div>
+              <div class="mc-meta">
+                ${sBadge(p.status)}
+                <span style="font-size:12px;color:var(--text2)">${p.client||''}</span>
+                <span style="font-size:12px;color:var(--text2)">${p.date||''}</span>
+              </div>
+              <div class="mc-amounts">
+                <span style="font-size:13px">${fmt(rv)}</span>
+                <span style="font-size:12px;color:var(--text2)">${fmt(co)} costs</span>
+                ${mBadge(m)}
+              </div>
+            </div>
+            <div data-col="rev">${fmt(rv)}</div>
+            <div data-col="cost">${fmt(co)}</div>
+            <div data-col="margin">${mBadge(m)}</div>
+            <div data-col="status">${sBadge(p.status)}</div>
+          </div>`;
+        }).join('')}
+      </div>`;
+
+  return `
+    <div class="topbar">
+      <div><div class="title">The Hangout</div><div class="subtitle">Catering administration</div></div>
+      <div class="topbar-right"><button class="btn-primary" onclick="newP()">+ New project</button></div>
+    </div>
+    <div class="stats-row">
+      ${statC('Projects',ps.length,active+' active')}
+      ${statC('Total revenue',fmt(tR))}
+      ${statC('Total costs',fmt(tC))}
+      ${statC('Gross margin',fmt(tM),tR>0?tP.toFixed(1)+'%':'—',true)}
+    </div>
+    ${rows}`;
+}
+
+function renderInfo(){
+  const p=S.p;
+  return `<div class="section-block">
+    <div>
+      <div class="section-label">Client details</div>
+      <div class="grid-3">
+        <div>${fl('Company')}${inp('client',p.client)}</div>
+        <div>${fl('Contact person')}${inp('contact',p.contact)}</div>
+        <div>${fl('Email')}${inp('email',p.email,'email')}</div>
+        <div>${fl('Phone')}${inp('phone',p.phone,'tel')}</div>
+      </div>
+    </div>
+    <div>
+      <div class="section-label">Event details</div>
+      <div class="grid-3">
+        <div>${fl('Date')}${inp('date',p.date,'date')}</div>
+        <div>${fl('Time')}${inp('time',p.time,'time')}</div>
+        <div>${fl('Event type')}${inp('event_type',p.event_type)}</div>
+        <div>${fl('Number of guests')}${inp('guests',p.guests,'number')}</div>
+        <div>${fl('Venue name')}${inp('venue',p.venue)}</div>
+        <div>${fl('Address')}${inp('address',p.address)}</div>
+      </div>
+    </div>
+    <div>
+      <div class="section-label">Brief & requirements</div>
+      <div class="grid-2">
+        <div>${fl('Project description')}${ta('description',p.description)}</div>
+        <div>${fl('Client requirements')}${ta('requirements',p.requirements)}</div>
+        <div>${fl('Dietary requirements')}${ta('dietary',p.dietary)}</div>
+        <div>${fl('Internal notes')}${ta('notes',p.notes)}</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderLines(type){
+  const cats=type==='costs'?COST_CATS:REV_CATS;
+  const lines=S.p[type]||[];
+  const tot=sum(lines),vatTot=vatSum(lines);
+  const isImg=(n)=>/\.(jpg|jpeg|png|gif|webp|heic)$/i.test(n||'');
+
+  const rows=lines.length===0
+    ?`<div style="padding:2rem;text-align:center;color:var(--text2);font-size:13px">No lines added yet.</div>`
+    :lines.map(r=>{
+      const hasFile=!!(r.file_url);
+      const attachBtn=`<label class="line-attach-btn r-attach${hasFile?' has-file':''}" title="${hasFile?'Replace attachment':'Attach receipt / photo'}">
+        <input type="file" accept="image/*,.pdf,.doc,.docx" onchange="uploadLineFile('${type}',${r.id},this.files[0])">
+        ${hasFile
+          ?`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#3b6d11" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>`
+          :`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--text3)" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>`
+        }
+      </label>`;
+
+      const preview=hasFile?`
+        <div style="grid-column:1/-1;padding:0 0 6px 0">
+          <div class="line-attach-preview">
+            ${isImg(r.file_name)
+              ?`<img src="${r.file_url}" style="width:32px;height:32px;object-fit:cover;border-radius:4px;flex-shrink:0">`
+              :`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="1.5" style="flex-shrink:0"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`
+            }
+            <a href="${r.file_url}" target="_blank">${r.file_name||'View file'}</a>
+            <button onclick="delLineFile('${type}',${r.id})" style="background:transparent;border:none;color:var(--text3);font-size:16px;cursor:pointer;padding:0 2px;line-height:1;flex-shrink:0">×</button>
+          </div>
+        </div>`:''
+
+      return `<div class="regel-row" style="${hasFile?'padding-bottom:4px':''}">
+        <input class="r-desc" value="${(r.description||'').replace(/"/g,'&quot;')}" placeholder="Description" onchange="updLine('${type}',${r.id},'description',this.value)">
+        <select class="r-cat" onchange="updLine('${type}',${r.id},'category',this.value)">${cats.map(c=>`<option${c===r.category?' selected':''}>${c}</option>`).join('')}</select>
+        <input class="r-store" value="${(r.store||'').replace(/"/g,'&quot;')}" placeholder="Store / supplier" onchange="updLine('${type}',${r.id},'store',this.value)">
+        <select class="r-vat" onchange="updLine('${type}',${r.id},'vat',this.value)">${Object.keys(VAT).map(t=>`<option${t===r.vat?' selected':''}>${t}</option>`).join('')}</select>
+        <input class="r-amount" type="number" value="${r.amount||''}" placeholder="0.00" style="text-align:right" onchange="updLine('${type}',${r.id},'amount',this.value)">
+        ${attachBtn}
+        <button class="r-del btn-icon" style="color:#a32d2d;padding:4px 6px;font-size:16px" onclick="delLine('${type}',${r.id})">×</button>
+        ${preview}
+      </div>`;
+    }).join('');
+
+  return `<div class="card">
+    <div class="regel-head">
+      <div>Description</div><div>Category</div><div>Store / supplier</div><div>VAT</div><div>Amount excl.</div><div></div><div></div>
+    </div>
+    ${rows}
+    <div class="regels-footer">
+      <button class="btn-ghost" onclick="addLine('${type}')">+ Add line</button>
+      <div class="totals-row">
+        <div><span>Excl. VAT </span><strong>${fmt(tot)}</strong></div>
+        <div><span>VAT </span><strong>${fmt(vatTot)}</strong></div>
+        <div><span>Incl. VAT </span><strong>${fmt(tot+vatTot)}</strong></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+async function uploadLineFile(type,id,file){
+  if(!file)return;
+  if(!S.p.id){alert('Save the project first before uploading files.');return;}
+  const path=`${S.p.id}/${type}-${id}-${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g,'_')}`;
+  const{data,error}=await db.storage.from('receipts').upload(path,file,{upsert:true});
+  if(error){alert('Upload failed: '+error.message+'\n\nMake sure the "receipts" storage bucket exists in Supabase (Storage → New bucket → name: receipts → Public: on).');return;}
+  const{data:urlData}=db.storage.from('receipts').getPublicUrl(path);
+  const lines=S.p[type].map(r=>r.id===id?{...r,file_url:urlData.publicUrl,file_name:file.name,file_path:path}:r);
+  S.p={...S.p,[type]:lines};
+  await save();
+}
+
+async function delLineFile(type,id){
+  const line=S.p[type].find(r=>r.id===id);
+  if(line?.file_path)await db.storage.from('receipts').remove([line.file_path]);
+  const lines=S.p[type].map(r=>r.id===id?{...r,file_url:null,file_name:null,file_path:null}:r);
+  S.p={...S.p,[type]:lines};
+  await save();
+}
+
+function renderFinancial(){
+  const p=S.p;
+  const tR=sum(p.revenues),tC=sum(p.costs);
+  const vatR=vatSum(p.revenues),vatC=vatSum(p.costs);
+  const mg=tR-tC,m=margin(tR,tC);
+  const guests=parseFloat(p.guests)||0;
+  const alertC=m>=40?'alert':`alert`;
+  const alertStyle=m>=40?`background:var(--green-bg);color:var(--green-fg)`:m>=30?`background:var(--amber-bg);color:var(--amber-fg)`:`background:var(--red-bg);color:var(--red-fg)`;
+  const alertT=m>=40?'Healthy margin. Well priced for this project.':m>=30?'Margin is on the low side. Consider raising the price slightly or reducing ingredient costs.':'Margin too low. Raise the price or cut costs. Aim for at least 30%.';
+  const row=(l,v,h=false)=>`<div class="result-row${h?' highlight':''}"><span class="r-label">${l}</span><span class="r-value">${v}</span></div>`;
+
+  return `<div style="display:flex;flex-direction:column;gap:1.25rem">
+    <div class="stats-row">
+      ${statC('Revenue excl. VAT',fmt(tR))}
+      ${statC('VAT on revenue',fmt(vatR))}
+      ${statC('Revenue incl. VAT',fmt(tR+vatR))}
+      ${statC('','')}
+    </div>
+    <div class="stats-row">
+      ${statC('Costs excl. VAT',fmt(tC))}
+      ${statC('VAT on costs',fmt(vatC))}
+      ${statC('Costs incl. VAT',fmt(tC+vatC))}
+      ${statC('','')}
+    </div>
+    <div class="card">
+      <div style="padding:10px 16px;background:var(--bg2);border-bottom:0.5px solid var(--border)">
+        <div class="section-label" style="margin:0">Result</div>
+      </div>
+      ${row('Revenue (excl. VAT)',fmt(tR))}
+      ${row('Costs (excl. VAT)',fmt(tC))}
+      ${row('Gross margin',fmt(mg),true)}
+      ${row('Margin %',mBadge(m),true)}
+      ${guests>0?row('Revenue per guest',fmt(tR/guests)):''}
+      ${guests>0?row('Costs per guest',fmt(tC/guests)):''}
+      ${guests>0?row('Margin per guest',fmt(mg/guests)):''}
+      ${row('VAT to remit',fmt(vatR))}
+      ${row('VAT to reclaim',fmt(vatC))}
+      ${row('Net VAT position',fmt(vatR-vatC))}
+    </div>
+    ${tR>0?`<div class="${alertC}" style="${alertStyle}">${alertT}</div>`:''}
+  </div>`;
+}
+
+function renderDocs(){
+  const p=S.p;
+  const attachments=p.attachments||[];
+  const isImg=(name)=>/\.(jpg|jpeg|png|gif|webp|heic)$/i.test(name);
+
+  const items=attachments.map(a=>`
+    <div class="attach-item" title="${a.name}">
+      ${isImg(a.name)
+        ?`<img class="attach-thumb" src="${a.url}" alt="${a.name}" onclick="window.open('${a.url}','_blank')">`
+        :`<div class="attach-file" onclick="window.open('${a.url}','_blank')">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            <span style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em">${(a.name.split('.').pop()||'file').toUpperCase()}</span>
+          </div>`
+      }
+      <div class="attach-name">${a.name}</div>
+      <button class="attach-del" onclick="delAttachment('${a.id}')">×</button>
+    </div>`).join('');
+
+  return `<div style="display:flex;flex-direction:column;gap:1rem">
+    <div class="card">
+      <div style="padding:10px 16px;background:var(--bg2);border-bottom:0.5px solid var(--border)">
+        <div class="section-label" style="margin:0">Attachments (${attachments.length})</div>
+      </div>
+      ${attachments.length>0?`<div class="attach-grid">${items}</div>`:''}
+      <div style="padding:${attachments.length>0?'0 14px 14px':'14px'}">
+        <label class="upload-zone" id="upload-zone">
+          <input type="file" multiple accept="image/*,.pdf,.doc,.docx,.xls,.xlsx" onchange="uploadFiles(this.files)">
+          <div id="upload-status">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--text3)" stroke-width="1.5" style="margin-bottom:8px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <div style="font-size:13px;color:var(--text2)">Click to upload or drag files here</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:4px">Images, PDF, Word, Excel</div>
+          </div>
+        </label>
+      </div>
+    </div>
+    <div style="padding:12px 16px;border-radius:var(--r);background:var(--bg2);font-size:13px;color:var(--text2);line-height:1.6">
+      Tip: Upload receipts, invoices or photos to back up each transaction. Files are stored securely in Supabase Storage.
+    </div>
+  </div>`;
+}
+
+async function uploadFiles(files){
+  if(!S.p.id){alert('Save the project first before uploading files.');return;}
+  const statusEl=document.getElementById('upload-status');
+  if(statusEl)statusEl.innerHTML='<div class="spinner"></div><div style="font-size:13px;color:var(--text2);margin-top:8px">Uploading...</div>';
+  const attachments=[...(S.p.attachments||[])];
+  for(const file of files){
+    const ext=file.name.split('.').pop();
+    const path=`${S.p.id}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g,'_')}`;
+    const {data,error}=await db.storage.from('receipts').upload(path,file,{upsert:true});
+    if(!error){
+      const {data:urlData}=db.storage.from('receipts').getPublicUrl(path);
+      attachments.push({id:Date.now()+'',name:file.name,url:urlData.publicUrl,path});
+    } else {
+      alert('Upload failed: '+error.message+'\n\nMake sure you created the "receipts" storage bucket in Supabase (Storage → New bucket → name: receipts → Public: on).');
+    }
+  }
+  S.p={...S.p,attachments};
+  await save();
+}
+
+async function delAttachment(id){
+  if(!confirm('Remove this attachment?'))return;
+  const att=S.p.attachments.find(a=>a.id===id);
+  if(att?.path)await db.storage.from('receipts').remove([att.path]);
+  S.p={...S.p,attachments:(S.p.attachments||[]).filter(a=>a.id!==id)};
+  await save();
+}
+
+function renderDetail(){
+  const p=S.p;if(!p)return'';
+  const sc=SC[p.status]||SC['Quote sent'];
+  const tabs=[['info','Project info'],['costs','Costs'],['revenues','Revenue'],['financial','Financial'],['docs','Documents']];
+  let content='';
+  if(S.tab==='info')content=renderInfo();
+  else if(S.tab==='costs')content=renderLines('costs');
+  else if(S.tab==='revenues')content=renderLines('revenues');
+  else if(S.tab==='financial')content=renderFinancial();
+  else if(S.tab==='docs')content=renderDocs();
+
+  return `
+    <button class="back-btn" onclick="back()">&#8249; Overview</button>
+    <div class="detail-header">
+      <div style="flex:1;min-width:0">
+        <input class="input-ghost" value="${(p.name||'').replace(/"/g,'&quot;')}" placeholder="Project name" onchange="sf('name',this.value)" style="width:100%">
+        <div class="subtitle" style="margin-top:4px">${p.client||'Unknown client'}${p.date?' · '+p.date:''}${p.venue?' · '+p.venue:''}</div>
+      </div>
+      <div class="detail-actions">
+        <select onchange="sf('status',this.value)" style="background:${sc.bg};color:${sc.fg};border:none;font-weight:600;font-size:12px;padding:7px 12px;border-radius:99px;cursor:pointer;width:auto;-webkit-appearance:none;appearance:none;letter-spacing:0.01em">
+          ${STATUSES.map(o=>`<option${o===p.status?' selected':''}>${o}</option>`).join('')}
+        </select>
+        <button class="btn-danger" onclick="del(${p.id})">Delete</button>
+        <button class="btn-primary" onclick="save()">${S.saving?'<div class="spinner" style="width:14px;height:14px;border-width:1.5px;filter:invert(1);display:inline-block"></div>':'Save'}</button>
+        ${S.saved?'<span style="font-size:12px;color:var(--green-fg);font-weight:500">&#10003; Saved</span>':''}
+      </div>
+    </div>
+    <div class="tabs">
+      ${tabs.map(([t,l])=>`<button class="tab-btn${S.tab===t?' active':''}" onclick="setTab('${t}')">${l}</button>`).join('')}
+    </div>
+    ${content}
+    <div class="save-bar">
+      ${S.saved?'<span style="font-size:12px;color:var(--green-fg);font-weight:500">&#10003; Saved</span>':''}
+      <button class="btn-primary" onclick="save()">${S.saving?'Saving...':'Save'}</button>
+    </div>`;
+}
+
+function render(){
+  const app=document.getElementById('app');
+  app.innerHTML=S.view==='overview'?renderOverview():renderDetail();
+}
+
+load();
+</script>
+</body>
+</html>
