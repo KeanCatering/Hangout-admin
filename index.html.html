@@ -233,9 +233,23 @@ document.getElementById(‘nav’).innerHTML=`<div class="global-nav-inner"><div
 }
 
 /* ── DATA LOADING ── */
-async function loadAll(){await Promise.all([loadEvents(),loadTeam()]);}
-async function loadEvents(){const{data,error}=await db.from(‘events’).select(’*’).order(‘date’,{ascending:true});if(!error)S.events=data||[];}
-async function loadTeam(){const{data}=await db.from(‘team’).select(’*’).order(‘created_at’,{ascending:true});S.team=data||[];}
+async function loadAll(){
+try{
+await Promise.all([loadEvents(),loadTeam()]);
+}catch(err){
+document.getElementById(‘app’).innerHTML=`<div style="padding:2rem;color:#a32d2d;font-size:14px;line-height:1.8"><strong>Connection error</strong><br>${err.message}<br><br><button onclick="init()" style="padding:8px 16px;background:#1a1a18;color:#fff;border:none;border-radius:10px;cursor:pointer;font-size:13px">Retry</button></div>`;
+}
+}
+async function loadEvents(){
+const{data,error}=await db.from(‘events’).select(’*’).order(‘date’,{ascending:true});
+if(error)throw new Error(‘Events: ‘+error.message);
+S.events=data||[];
+}
+async function loadTeam(){
+const{data,error}=await db.from(‘team’).select(’*’).order(‘created_at’,{ascending:true});
+if(error)throw new Error(’Team: ’+error.message);
+S.team=data||[];
+}
 
 /* ══════════════════════════════════════════
 EVENTS — single source of truth
