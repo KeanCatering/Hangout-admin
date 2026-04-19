@@ -212,7 +212,7 @@ let S={
   section:'home',
   // Events (shared source of truth)
   evView:'list',events:[],ev:null,evTab:'info',evSaving:false,evSaved:false,
-  catTab:'kanban',task:null,newTaskForm:false,newNeedForm:false,newTaskData:{},
+  catTab:'kanban',task:null,newTaskForm:false,newNeedForm:false,newTaskData:{},plannerEvId:null,
   // Team
   team:[],newTeamForm:false,editingTeamId:null,
   // Admin (financial view of events - same data)
@@ -240,18 +240,20 @@ function weekLabel(dateStr){if(!dateStr)return'Unscheduled';const d=new Date(dat
 function go(s){S.section=s;render();}
 function renderNav(){
   const links=[['home','Home'],['events','Events'],['catering','Planner'],['admin','Admin'],['team','Team']];
-  const logo=`<svg width="32" height="32" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="50" cy="50" r="47" stroke="#FFD243" stroke-width="3.5" fill="none"/>
-    <circle cx="50" cy="50" r="41" stroke="#FFD243" stroke-width="2" fill="none"/>
+  const logo=`<svg width="34" height="34" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="50" cy="50" r="46" stroke="#FFD243" stroke-width="4" fill="none"/>
+    <circle cx="50" cy="50" r="39" stroke="#FFD243" stroke-width="2" fill="none"/>
     <g fill="#FFD243">
-      <rect x="22" y="22" width="7" height="56"/>
-      <rect x="22" y="22" width="27" height="7"/>
-      <rect x="22" y="48" width="27" height="6"/>
-      <rect x="42" y="22" width="7" height="34"/>
-      <rect x="49" y="22" width="7" height="56"/>
-      <rect x="49" y="22" width="29" height="7"/>
-      <rect x="49" y="48" width="29" height="6"/>
-      <rect x="71" y="22" width="7" height="34"/>
+      <!-- T horizontal bar -->
+      <rect x="18" y="22" width="37" height="8"/>
+      <!-- T vertical / H left leg (shared) -->
+      <rect x="29" y="22" width="8" height="56"/>
+      <!-- H right leg -->
+      <rect x="62" y="22" width="8" height="56"/>
+      <!-- H crossbar -->
+      <rect x="37" y="44" width="33" height="8"/>
+      <!-- H top cap -->
+      <rect x="49" y="22" width="21" height="8"/>
     </g>
   </svg>`;
   document.getElementById('nav').innerHTML=`<div class="global-nav-inner"><div class="nav-brand">${logo}<span style="font-family:var(--font-display);font-size:15px;font-weight:700;letter-spacing:0.01em">The Hangout <span style="color:var(--brand-gold)">PM</span></span></div>${links.map(([s,l])=>`<button class="nav-link${S.section===s?' active':''}" onclick="go('${s}')">${l}</button>`).join('')}</div>`;
@@ -286,7 +288,16 @@ function newEv(){
 function openEv(id,tab='info'){
   const ev=S.events.find(e=>e.id===id);
   if(!ev)return;
-  S.ev={...ev};S.evTab=tab;S.evView='detail';S.section='events';render();
+  if(tab==='planner'){
+    // Open in planner section
+    S.ev={...ev};S.plannerEvId=id;S.catTab='kanban';S.task=null;S.newTaskForm=false;S.section='catering';render();
+  } else {
+    S.ev={...ev};S.evTab=tab;S.evView='detail';S.section='events';render();
+  }
+}
+function backToPlanner(){
+  if(S.task){S.task=null;render();return;}
+  S.plannerEvId=null;S.ev=null;S.newTaskForm=false;render();
 }
 function backToEventList(){S.evView='list';S.ev=null;S.task=null;render();}
 function sfEv(k,v){S.ev={...S.ev,[k]:v};}
@@ -306,8 +317,9 @@ async function saveEv(silent=false){
       if(data)S.ev={...S.ev,...data};
     }
     await loadEvents();
-    if(S.ev?.id)S.ev={...S.events.find(x=>x.id===S.ev.id)||S.ev};
+    if(S.ev?.id){S.ev={...S.events.find(x=>x.id===S.ev.id)||S.ev};}
     if(!silent){S.evSaving=false;S.evSaved=true;render();setTimeout(()=>{S.evSaved=false;render();},2200);}
+    else{render();}
   }catch(err){
     console.error(err);
     alert('Save failed: '+err.message);
@@ -363,9 +375,8 @@ async function createTask(){
 
 function openTask(taskId){
   const t=(S.ev?.tasks||[]).find(t=>t.id===taskId);
-  if(t){S.task={...t};S.evTab='task-detail';render();}
+  if(t){S.task={...t};render();}
 }
-function backToPlanner(){S.evTab='planner';S.task=null;render();}
 
 async function toggleTaskAssignee(name){
   const arr=S.task.assignees||[];
@@ -487,15 +498,13 @@ function renderEventsList(){
 
 function renderEventDetail(){
   const ev=S.ev;if(!ev)return'';
-  if(S.evTab==='task-detail')return renderTaskDetail();
+
+  // Only 3 tabs in Events: info, team, docs
+  if(!['info','team-assign','docs'].includes(S.evTab))S.evTab='info';
   const sc=SC[ev.status]||SC['Quote sent'];
-  const tabs=[['info','Event info'],['costs','Costs'],['revenues','Revenue'],['financial','Financial'],['planner','Planner'],['team-assign','Team'],['docs','Documents']];
+  const tabs=[['info','Event info'],['team-assign','Team'],['docs','Documents']];
   let content='';
   if(S.evTab==='info')content=renderEvInfo();
-  else if(S.evTab==='costs')content=renderEvLines('costs');
-  else if(S.evTab==='revenues')content=renderEvLines('revenues');
-  else if(S.evTab==='financial')content=renderEvFinancial();
-  else if(S.evTab==='planner')content=renderEvPlanner();
   else if(S.evTab==='team-assign')content=renderEvTeamAssign();
   else if(S.evTab==='docs')content=renderEvDocs();
 
@@ -543,9 +552,19 @@ function renderEvInfo(){
     </div></div>
     <div>
       <div class="section-label">Agreed menu</div>
-      <div style="font-size:12px;color:var(--text2);margin-bottom:8px">Write down the dishes agreed with the client. Tasks can reference these dishes.</div>
-      <textarea onchange="sfEv('menu',this.value)" style="min-height:140px;font-size:14px;line-height:1.7">${(ev.menu||'').replace(/</g,'&lt;')}</textarea>
-      ${ev.menu?`<div style="margin-top:10px;padding:12px 14px;background:var(--gold-50);border:0.5px solid var(--gold-500);border-radius:var(--r);font-size:13px;line-height:1.7;white-space:pre-wrap">${ev.menu.replace(/</g,'&lt;')}</div>`:''}
+      <div style="font-size:12px;color:var(--text2);margin-bottom:8px">Dishes agreed with the client.</div>
+      <textarea onchange="sfEv('menu',this.value)" style="min-height:120px;font-size:14px;line-height:1.7">${(ev.menu||'').replace(/</g,'&lt;')}</textarea>
+      ${ev.menu?`<div style="margin-top:8px;padding:12px 14px;background:var(--gold-50);border:0.5px solid var(--gold-500);border-radius:var(--r);font-size:13px;line-height:1.7;white-space:pre-wrap">${ev.menu.replace(/</g,'&lt;')}</div>`:''}
+    </div>
+    <div>
+      <div class="card">
+        <div style="padding:10px 16px;background:var(--bg2);border-bottom:0.5px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+          <div class="section-label" style="margin:0">Customer needs & allergens</div>
+          <button class="btn-ghost" style="padding:4px 10px;font-size:12px" onclick="S.newNeedForm=!S.newNeedForm;render()">+ Add</button>
+        </div>
+        ${S.newNeedForm?`<div style="padding:12px 16px;border-bottom:0.5px solid var(--border);display:flex;gap:8px;flex-wrap:wrap"><input id="need-count" type="number" placeholder="Count" style="width:80px"><input id="need-text" placeholder="e.g. nut allergy" style="flex:1"><button class="btn-primary" style="padding:7px 14px" onclick="addNeed()">Add</button></div>`:''}
+        ${(ev.customer_needs||[]).length===0?`<div style="padding:1rem 16px;font-size:13px;color:var(--text2)">No requirements noted.</div>`:(ev.customer_needs||[]).map(n=>`<div class="need-row" style="padding:8px 16px"><span style="font-size:13px">${n.count>0?`<strong>${n.count}</strong> guests — `:''}<span>${n.text}</span></span><button class="btn-icon" style="color:#a32d2d;font-size:16px;margin-left:auto" onclick="removeNeed('${n.id}')">×</button></div>`).join('')}
+      </div>
     </div>
   </div>`;
 }
@@ -598,8 +617,24 @@ function renderEvFinancial(){return renderFinancialView(S.ev);}
 
 function renderEvDocs(){
   const ev=S.ev;const att=ev.attachments||[];const isImg=(name)=>/\.(jpg|jpeg|png|gif|webp|heic)$/i.test(name);
-  const items=att.map(a=>`<div class="attach-item" title="${a.name}">${isImg(a.name)?`<img class="attach-thumb" src="${a.url}" onclick="window.open('${a.url}','_blank')">`:`<div class="attach-file" onclick="window.open('${a.url}','_blank')"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span style="font-size:11px;color:var(--text2);text-transform:uppercase">${(a.name.split('.').pop()||'file').toUpperCase()}</span></div>`}<div class="attach-name">${a.name}</div><button class="attach-del" onclick="delEvAtt('${a.id}')">×</button></div>`).join('');
-  return`<div class="card"><div style="padding:10px 16px;background:var(--bg2);border-bottom:0.5px solid var(--border)"><div class="section-label" style="margin:0">Attachments (${att.length})</div></div>${att.length>0?`<div class="attach-grid">${items}</div>`:''}<div style="padding:${att.length>0?'0 14px 14px':'14px'}"><label class="upload-zone"><input type="file" multiple accept="image/*,.pdf,.doc,.docx,.xls,.xlsx" onchange="uploadEvFiles(this.files)"><div><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--text3)" stroke-width="1.5" style="margin-bottom:8px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg><div style="font-size:13px;color:var(--text2)">Click to upload or drag files here</div></div></label></div></div>`;
+  const items=att.map(a=>`<div class="attach-item" title="${a.name}">${isImg(a.name)?`<img class="attach-thumb" src="${a.url}" alt="${a.name}" onclick="window.open('${a.url}','_blank')">`:`<div class="attach-file" onclick="window.open('${a.url}','_blank')"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span style="font-size:11px;color:var(--text2);text-transform:uppercase">${(a.name.split('.').pop()||'file').toUpperCase()}</span></div>`}<div class="attach-name">${a.name}</div><button class="attach-del" onclick="delEvAtt('${a.id}')">×</button></div>`).join('');
+  return`<div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+      <div class="section-label" style="margin:0">Documents (${att.length})</div>
+    </div>
+    <div class="card" style="overflow:visible">
+      ${att.length>0?`<div class="attach-grid">${items}</div>`:''}
+      <div style="padding:${att.length>0?'0 14px 14px':'14px'}">
+        <label class="upload-zone">
+          <input type="file" multiple accept="image/*,.pdf,.doc,.docx,.xls,.xlsx" onchange="uploadEvFiles(this.files)">
+          <div>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--text3)" stroke-width="1.5" style="margin-bottom:8px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <div style="font-size:13px;color:var(--text2)">Click to upload or drag files here</div>
+          </div>
+        </label>
+      </div>
+    </div>
+  </div>`;
 }
 
 /* ── TEAM ASSIGNMENT per event ── */
@@ -650,39 +685,7 @@ function updateAssignment(memberId,field,value){
   sfEv('team_assignments',(S.ev.team_assignments||[]).map(a=>a.memberId===memberId?{...a,[field]:value}:a));
 }
 
-/* ── PLANNER TAB (inside event) ── */
-function renderEvPlanner(){
-  const ev=S.ev;
-  const tasks=ev.tasks||[];
-  const needs=ev.customer_needs||[];
-  let viewContent='';
-  if(S.catTab==='kanban')viewContent=renderKanban(tasks);
-  else if(S.catTab==='timeline')viewContent=renderEvTimeline(tasks);
-  else if(S.catTab==='categories')viewContent=renderCategories(tasks);
-
-  const needsPanel=`<div class="card" style="margin-bottom:1.25rem">
-    <div style="padding:10px 16px;background:var(--bg2);border-bottom:0.5px solid var(--border);display:flex;justify-content:space-between;align-items:center">
-      <div class="section-label" style="margin:0">Customer needs & allergens</div>
-      <button class="btn-ghost" style="padding:4px 10px;font-size:12px" onclick="S.newNeedForm=!S.newNeedForm;render()">+ Add</button>
-    </div>
-    ${S.newNeedForm?`<div style="padding:12px 16px;border-bottom:0.5px solid var(--border);display:flex;gap:8px;flex-wrap:wrap"><input id="need-count" type="number" placeholder="Count" style="width:80px"><input id="need-text" placeholder="e.g. nut allergy" style="flex:1"><button class="btn-primary" style="padding:7px 14px" onclick="addNeed()">Add</button></div>`:''}
-    ${needs.length===0?`<div style="padding:1rem 16px;font-size:13px;color:var(--text2)">No requirements noted.</div>`:needs.map(n=>`<div class="need-row" style="padding:8px 16px"><span style="font-size:13px">${n.count>0?`<strong>${n.count}</strong> guests — `:''}<span>${n.text}</span></span><button class="btn-icon" style="color:#a32d2d;font-size:16px;margin-left:auto" onclick="removeNeed('${n.id}')">×</button></div>`).join('')}
-  </div>`;
-
-  return`<div>
-    ${needsPanel}
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:8px">
-      <div class="tabs" style="margin-bottom:0">
-        <button class="tab-btn${S.catTab==='kanban'?' active':''}" onclick="S.catTab='kanban';render()">Kanban</button>
-        <button class="tab-btn${S.catTab==='timeline'?' active':''}" onclick="S.catTab='timeline';render()">Timeline</button>
-        <button class="tab-btn${S.catTab==='categories'?' active':''}" onclick="S.catTab='categories';render()">Categories</button>
-      </div>
-      <button class="btn-primary" onclick="openNewTaskForm()">+ Add task</button>
-    </div>
-    ${S.newTaskForm?renderNewTaskForm():''}
-    ${viewContent}
-  </div>`;
-}
+/* renderEvPlanner moved to renderPlannerEventView in Planner section */
 
 function renderNewTaskForm(){
   const d=S.newTaskData||{};
@@ -714,7 +717,7 @@ function renderTaskDetail(){
   const t=S.task;if(!t)return'';
   const teamOptions=S.team.map(m=>m.name);
   return`
-    <button class="back-btn" onclick="backToPlanner()">&#8249; Planner</button>
+    <button class="back-btn" onclick="backToPlanner()">&#8249; ${S.ev?.name||'Planner'}</button>
     <div class="detail-header">
       <div style="flex:1;min-width:0">
         <input class="input-ghost" value="${(t.title||'').replace(/"/g,'&quot;')}" placeholder="Task title" onchange="updateTask('title',this.value)" style="width:100%">
@@ -799,9 +802,44 @@ function renderCategories(tasks){
 }
 
 /* ══════════════════════════════════════════
-   PLANNER — overview across all events
+   PLANNER — overview + per-event task view
 ══════════════════════════════════════════ */
 function renderPlanner(){
+  // If an event is selected, show its full task management view
+  if(S.plannerEvId&&S.ev){
+    if(S.task)return renderTaskDetail();
+    return renderPlannerEventView();
+  }
+  return renderPlannerOverview();
+}
+
+function renderPlannerEventView(){
+  const ev=S.ev;
+  const tasks=ev.tasks||[];
+  let viewContent='';
+  if(S.catTab==='kanban')viewContent=renderKanban(tasks);
+  else if(S.catTab==='timeline')viewContent=renderEvTimeline(tasks);
+  else if(S.catTab==='categories')viewContent=renderCategories(tasks);
+  const cd=countdown(ev.date);
+  return`
+    <button class="back-btn" onclick="S.plannerEvId=null;S.ev=null;S.newTaskForm=false;render()">&#8249; Planner</button>
+    <div style="margin-bottom:1.25rem">
+      <div style="font-family:var(--font-display);font-size:22px;font-weight:700">${ev.name||'Untitled'}</div>
+      <div class="subtitle">${ev.client||''}${ev.date?' · '+fmtDate(ev.date):''}${ev.venue?' · '+ev.venue:''} · <span style="color:${cd==='Today'||cd==='Tomorrow'?'#854f0b':cd==='Past'?'#a32d2d':'var(--text2)'}">${cd}</span></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:8px">
+      <div class="tabs" style="margin-bottom:0">
+        <button class="tab-btn${S.catTab==='kanban'?' active':''}" onclick="S.catTab='kanban';render()">Kanban</button>
+        <button class="tab-btn${S.catTab==='timeline'?' active':''}" onclick="S.catTab='timeline';render()">Timeline</button>
+        <button class="tab-btn${S.catTab==='categories'?' active':''}" onclick="S.catTab='categories';render()">Categories</button>
+      </div>
+      <button class="btn-primary" onclick="openNewTaskForm()">+ Add task</button>
+    </div>
+    ${S.newTaskForm?renderNewTaskForm():''}
+    ${viewContent}`;
+}
+
+function renderPlannerOverview(){
   const today=new Date().toISOString().slice(0,10);
   const all=S.events.filter(e=>e.status!=='Cancelled').sort((a,b)=>a.date.localeCompare(b.date));
   const upcoming=all.filter(e=>e.date>=today);
@@ -825,7 +863,7 @@ function renderPlanner(){
         <div style="font-size:15px;font-weight:600;flex:1">${ev.name||'Untitled'}</div>
         ${sBadge(ev.status)}
         <span style="font-size:12px;color:${cdColor};white-space:nowrap">${cd}</span>
-        <button class="btn-ghost" style="padding:4px 10px;font-size:12px;flex-shrink:0" onclick="openEv(${ev.id},'planner')">Planner &#8250;</button>
+        <button class="btn-ghost" style="padding:4px 10px;font-size:12px;flex-shrink:0" onclick="openEv(${ev.id},'planner')">Open &#8250;</button>
       </div>
       ${ev.venue||ev.guests?`<div style="font-size:12px;color:var(--text2);margin-bottom:8px">${[ev.venue,ev.guests?ev.guests+' guests':'',ev.event_type].filter(Boolean).join(' · ')}</div>`:''}
       ${(ev.customer_needs||[]).length>0?`<div style="font-size:12px;color:#a32d2d;margin-bottom:8px;padding:6px 10px;background:var(--red-bg);border-radius:var(--r)">&#9888; ${(ev.customer_needs||[]).map(n=>`${n.count?'<strong>'+n.count+'</strong> guests ':''}<span>${n.text}</span>`).join(' · ')}</div>`:''}
@@ -834,7 +872,7 @@ function renderPlanner(){
         ?`<div style="font-size:12px;color:var(--green-fg);padding:6px 0;font-weight:500">&#10003; All tasks completed</div>`
         :openList.length===0
         ?`<div style="font-size:12px;color:var(--text3);padding:6px 0">No tasks yet. <button class="btn-ghost" style="padding:3px 8px;font-size:11px" onclick="openEv(${ev.id},'planner')">Add tasks &#8250;</button></div>`
-        :openList.map(t=>`<div class="tl-item" onclick="openEv(${ev.id},'planner');setTimeout(()=>{openTask('${t.id}');},100)">
+        :openList.slice(0,4).map(t=>`<div class="tl-item" onclick="openEv(${ev.id},'planner')">
           <div class="tl-time">${t.plannedDate?fmtDate(t.plannedDate):'—'}</div>
           <div class="tl-body">
             <div class="tl-title">${t.title||'Untitled'}</div>
@@ -843,10 +881,10 @@ function renderPlanner(){
               <span class="badge" style="font-size:10px;padding:1px 7px;background:${t.status==='In Progress'?'var(--amber-bg)':'var(--blue-bg)'};color:${t.status==='In Progress'?'var(--amber-fg)':'var(--blue-fg)'}">${t.status}</span>
               ${(t.assignees?.length?t.assignees:[t.assignee].filter(Boolean)).map(a=>`<span>${a}</span>`).join('')}
               ${t.deadline?`<span style="color:${new Date(t.deadline)<new Date()&&t.status!=='Done'?'#a32d2d':'var(--text2)'}">Due: ${fmtDate(t.deadline)}</span>`:''}
-              ${t.allergens?.length?`<span style="color:#a32d2d">&#9888; ${t.allergens.join(', ')}</span>`:''}
             </div>
           </div>
         </div>`).join('')}
+      ${openList.length>4?`<div style="font-size:12px;color:var(--teal-500);padding:4px 0;cursor:pointer" onclick="openEv(${ev.id},'planner')">+${openList.length-4} more tasks &#8250;</div>`:''}
     </div>`;
   };
 
