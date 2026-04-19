@@ -5,22 +5,34 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Hangout">
-<title>The Hangout</title>
+<meta name="apple-mobile-web-app-title" content="Hangout PM">
+<title>The Hangout Project Manager</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Work+Sans:wght@300;400;500;600;700&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#fff;--bg2:#f7f6f3;--bg3:#f0efe9;--text:#1a1a18;--text2:#6b6a65;--text3:#9b9a96;--border:rgba(0,0,0,0.09);--border2:rgba(0,0,0,0.16);--green-bg:#eaf3de;--green-fg:#27500a;--amber-bg:#faeeda;--amber-fg:#633806;--red-bg:#fcebeb;--red-fg:#791f1f;--blue-bg:#e6f1fb;--blue-fg:#0c447c;--r:10px;--r-lg:14px;--shadow:0 1px 3px rgba(0,0,0,0.08),0 1px 2px rgba(0,0,0,0.05)}
+:root{
+  --brand-gold:#FFD243;--brand-teal:#018D8A;--brand-navy:#004255;--brand-cream:#F5F0E8;
+  --gold-50:#FFF8DE;--gold-100:#FFEDA8;--gold-500:#FFD243;--gold-700:#D9A800;--gold-900:#7A5F00;
+  --teal-500:#018D8A;--teal-700:#016562;--navy-500:#004255;--navy-700:#002E3C;--navy-900:#001921;
+  --cream-50:#FBF8F2;--cream-100:#F5F0E8;--cream-300:#E6DCC9;
+  --bg:var(--cream-100);--bg2:var(--cream-50);--bg3:#EDE8DF;
+  --text:var(--navy-900);--text2:var(--navy-700);--text3:#5C6F78;
+  --border:rgba(0,66,85,0.14);--border2:rgba(0,66,85,0.32);
+  --green-bg:#eaf3de;--green-fg:#27500a;--amber-bg:#faeeda;--amber-fg:#633806;--red-bg:#fcebeb;--red-fg:#791f1f;--blue-bg:#e6f1fb;--blue-fg:#0c447c;
+  --r:8px;--r-lg:14px;--shadow:0 1px 2px rgba(0,66,85,0.08);--shadow-2:0 4px 12px rgba(0,66,85,0.10);
+  --font-display:'Playfair Display',Georgia,serif;--font-sans:'Work Sans',-apple-system,'Helvetica Neue',Arial,sans-serif;
+}
 html{-webkit-text-size-adjust:100%}
-body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',sans-serif;background:var(--bg3);color:var(--text);font-size:14px;line-height:1.5;min-height:100vh;padding-bottom:env(safe-area-inset-bottom)}
+body{font-family:var(--font-sans);background:var(--bg3);color:var(--text);font-size:14px;line-height:1.5;min-height:100vh;padding-bottom:env(safe-area-inset-bottom)}
 .page{max-width:980px;margin:0 auto;padding:1.5rem}
 @media(max-width:600px){.page{padding:1rem 0.875rem}}
-.title{font-size:22px;font-weight:600;letter-spacing:-0.025em}
+.title{font-family:var(--font-display);font-size:22px;font-weight:700;letter-spacing:-0.02em}
 .subtitle{font-size:13px;color:var(--text2);margin-top:2px}
-.section-label{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px}
+.section-label{font-size:11px;font-weight:600;color:var(--teal-500);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px}
 .field-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px}
 .card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow)}
-.stat-card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--r-lg);padding:14px 16px;box-shadow:var(--shadow)}
+.stat-card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--r-lg);padding:14px 16px;box-shadow:var(--shadow-2)}
 .stat-card.muted{background:var(--bg2);border-color:transparent;box-shadow:none}
 .stat-label{font-size:11px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px}
 .stat-value{font-size:21px;font-weight:600;line-height:1;letter-spacing:-0.02em}
@@ -29,7 +41,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',sans-
 @media(max-width:600px){.stats-row{grid-template-columns:repeat(2,1fr)}}
 button{font-family:inherit;cursor:pointer;border-radius:var(--r);font-size:13px;transition:all 0.15s;-webkit-tap-highlight-color:transparent}
 button:hover{opacity:0.85}
-.btn-primary{background:var(--text);color:#fff;border:none;padding:9px 18px;font-weight:500}
+.btn-primary{background:var(--brand-navy);color:var(--cream-100);border:none;padding:9px 18px;font-weight:500;letter-spacing:0.01em}
 .btn-primary:active{opacity:0.8;transform:scale(0.98)}
 .btn-ghost{background:var(--bg);border:0.5px solid var(--border2);color:var(--text);padding:8px 14px}
 .btn-ghost:active{background:var(--bg2)}
@@ -55,7 +67,7 @@ textarea{resize:vertical;min-height:80px;line-height:1.6}
 .tabs{display:flex;gap:6px;margin-bottom:1.5rem;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:2px}
 .tabs::-webkit-scrollbar{display:none}
 .tab-btn{background:transparent;border:0.5px solid transparent;border-radius:99px;padding:7px 16px;font-size:13px;color:var(--text2);white-space:nowrap;flex-shrink:0;transition:all 0.15s}
-.tab-btn.active{background:var(--text);color:#fff;border-color:var(--text);font-weight:500}
+.tab-btn.active{background:var(--brand-navy);color:var(--cream-100);border-color:var(--brand-navy);font-weight:500}
 .tab-btn:hover:not(.active){background:var(--bg2);border-color:var(--border)}
 .regel-head{display:grid;grid-template-columns:2fr 1.2fr 1fr 68px 100px 36px 36px;background:var(--bg2);border-bottom:0.5px solid var(--border);padding:9px 14px;gap:8px}
 .regel-head>div{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em}
@@ -104,21 +116,21 @@ hr{border:none;border-top:0.5px solid var(--border);margin:1.5rem 0}
 .totals-row strong{color:var(--text);font-weight:600}
 .save-bar{display:flex;justify-content:flex-end;gap:8px;align-items:center;padding-top:1.25rem;border-top:0.5px solid var(--border);margin-top:1.5rem}
 .back-btn{display:flex;align-items:center;gap:4px;background:transparent;border:none;color:var(--text2);font-size:14px;padding:4px 0;margin-bottom:1rem;cursor:pointer}
-.global-nav{background:var(--bg);border-bottom:0.5px solid var(--border);box-shadow:var(--shadow)}
+.global-nav{background:var(--navy-900);border-bottom:none;box-shadow:0 2px 8px rgba(0,66,85,0.18)}
 .global-nav-inner{max-width:980px;margin:0 auto;padding:0 1.5rem;display:flex;align-items:center;height:52px;gap:2px;overflow-x:auto}
 @media(max-width:600px){.global-nav-inner{padding:0 0.875rem}}
 .global-nav-inner::-webkit-scrollbar{display:none}
-.nav-brand{font-size:15px;font-weight:700;letter-spacing:-0.02em;margin-right:1rem;white-space:nowrap;flex-shrink:0}
-.nav-link{background:transparent;border:none;padding:6px 11px;font-size:13px;color:var(--text2);border-radius:var(--r);white-space:nowrap;flex-shrink:0}
-.nav-link.active{background:var(--bg2);color:var(--text);font-weight:500}
-.nav-link:hover:not(.active){background:var(--bg3)}
+.nav-brand{font-family:var(--font-display);font-size:14px;font-weight:700;letter-spacing:0.01em;margin-right:1.25rem;white-space:nowrap;flex-shrink:0;color:var(--cream-100);display:flex;align-items:center;gap:8px}
+.nav-link{background:transparent;border:none;padding:6px 11px;font-size:13px;color:rgba(245,240,232,0.65);border-radius:var(--r);white-space:nowrap;flex-shrink:0}
+.nav-link.active{background:rgba(255,210,67,0.15);color:var(--brand-gold);font-weight:600}
+.nav-link:hover:not(.active){background:rgba(245,240,232,0.08);color:var(--cream-100)}
 .home-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:1.5rem}
 @media(max-width:600px){.home-grid{grid-template-columns:1fr}}
 .home-card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--r-lg);padding:1.5rem;cursor:pointer;transition:all 0.15s;box-shadow:var(--shadow)}
 .home-card:hover{box-shadow:0 4px 12px rgba(0,0,0,0.1);transform:translateY(-1px)}
 .home-card:active{transform:translateY(0)}
 .home-card-icon{width:40px;height:40px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;margin-bottom:1rem;background:var(--bg2)}
-.home-card-title{font-size:15px;font-weight:600;margin-bottom:4px}
+.home-card-title{font-family:var(--font-display);font-size:16px;font-weight:700;margin-bottom:4px;color:var(--navy-900)}
 .home-card-sub{font-size:12px;color:var(--text2);line-height:1.5}
 .home-card-count{margin-top:1rem;font-size:12px;color:var(--text3)}
 .event-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
@@ -228,7 +240,8 @@ function weekLabel(dateStr){if(!dateStr)return'Unscheduled';const d=new Date(dat
 function go(s){S.section=s;render();}
 function renderNav(){
   const links=[['home','Home'],['events','Events'],['catering','Planner'],['admin','Admin'],['team','Team']];
-  document.getElementById('nav').innerHTML=`<div class="global-nav-inner"><div class="nav-brand">The Hangout</div>${links.map(([s,l])=>`<button class="nav-link${S.section===s?' active':''}" onclick="go('${s}')">${l}</button>`).join('')}</div>`;
+  const logo=`<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="11" fill="#FFD243"/><path d="M7 8.5C7 7.67 7.67 7 8.5 7h7C16.33 7 17 7.67 17 8.5v5c0 .83-.67 1.5-1.5 1.5H13l-2 2.5V15H8.5C7.67 15 7 14.33 7 13.5v-5z" fill="#004255"/></svg>`;
+  document.getElementById('nav').innerHTML=`<div class="global-nav-inner"><div class="nav-brand">${logo}<span>The Hangout <span style="color:var(--brand-gold);font-weight:800">PM</span></span></div>${links.map(([s,l])=>`<button class="nav-link${S.section===s?' active':''}" onclick="go('${s}')">${l}</button>`).join('')}</div>`;
 }
 
 /* ── DATA LOADING ── */
@@ -254,7 +267,7 @@ async function loadTeam(){
    EVENTS — single source of truth
 ══════════════════════════════════════════ */
 function newEv(){
-  S.ev={name:'',client:'',contact:'',email:'',phone:'',date:'',time:'',venue:'',address:'',event_type:'',guests:'',status:'Quote sent',description:'',requirements:'',dietary:'',notes:'',costs:[],revenues:[],attachments:[],customer_needs:[],tasks:[],team_assignments:[]};
+  S.ev={name:'',client:'',contact:'',email:'',phone:'',date:'',time:'',venue:'',address:'',event_type:'',guests:'',status:'Quote sent',description:'',requirements:'',dietary:'',notes:'',menu:'',costs:[],revenues:[],attachments:[],customer_needs:[],tasks:[],team_assignments:[]};
   S.evTab='info';S.evView='detail';S.section='events';render();
 }
 function openEv(id,tab='info'){
@@ -269,7 +282,7 @@ function setEvTab(t){S.evTab=t;S.task=null;render();}
 async function saveEv(silent=false){
   if(!silent){S.evSaving=true;render();}
   const ev=S.ev;
-  const pl={name:ev.name||'',client:ev.client||'',contact:ev.contact||'',email:ev.email||'',phone:ev.phone||'',date:ev.date||'',time:ev.time||'',venue:ev.venue||'',address:ev.address||'',event_type:ev.event_type||'',guests:parseInt(ev.guests)||0,status:ev.status||'Quote sent',description:ev.description||'',requirements:ev.requirements||'',dietary:ev.dietary||'',notes:ev.notes||'',costs:ev.costs||[],revenues:ev.revenues||[],attachments:ev.attachments||[],customer_needs:ev.customer_needs||[],tasks:ev.tasks||[],team_assignments:ev.team_assignments||[]};
+  const pl={name:ev.name||'',client:ev.client||'',contact:ev.contact||'',email:ev.email||'',phone:ev.phone||'',date:ev.date||'',time:ev.time||'',venue:ev.venue||'',address:ev.address||'',event_type:ev.event_type||'',guests:parseInt(ev.guests)||0,status:ev.status||'Quote sent',description:ev.description||'',requirements:ev.requirements||'',dietary:ev.dietary||'',notes:ev.notes||'',menu:ev.menu||'',costs:ev.costs||[],revenues:ev.revenues||[],attachments:ev.attachments||[],customer_needs:ev.customer_needs||[],tasks:ev.tasks||[],team_assignments:ev.team_assignments||[]};
   try{
     if(ev.id&&S.events.find(x=>x.id===ev.id)){
       const{error}=await db.from('events').update(pl).eq('id',ev.id);
@@ -315,7 +328,7 @@ async function removeNeed(id){
 
 /* ── TASKS ── */
 function openNewTaskForm(){
-  S.newTaskData={title:'',category:TASK_CATS[0],assignee:'',plannedDate:'',deadline:'',prepBy:'',serveBy:'',allergens:[],portions:'',status:'To Do'};
+  S.newTaskData={title:'',category:TASK_CATS[0],assignee:'',plannedDate:'',deadline:'',prepBy:'',serveBy:'',allergens:[],portions:'',status:'To Do',dish:''};
   S.newTaskForm=true;render();
 }
 function setNTD(k,v){S.newTaskData={...S.newTaskData,[k]:v};}
@@ -324,7 +337,7 @@ function toggleNTDAllergen(a){const al=S.newTaskData.allergens||[];S.newTaskData
 async function createTask(){
   const d=S.newTaskData;
   if(!d.title?.trim()){alert('Enter a task title.');return;}
-  const task={id:uid(),title:d.title.trim(),category:d.category||TASK_CATS[0],status:d.status||'To Do',assignee:d.assignee||'',plannedDate:d.plannedDate||'',deadline:d.deadline||'',prepBy:d.prepBy||'',serveBy:d.serveBy||'',allergens:d.allergens||[],portions:d.portions||'',comments:[]};
+  const task={id:uid(),title:d.title.trim(),category:d.category||TASK_CATS[0],status:d.status||'To Do',assignee:d.assignee||'',plannedDate:d.plannedDate||'',deadline:d.deadline||'',prepBy:d.prepBy||'',serveBy:d.serveBy||'',allergens:d.allergens||[],portions:d.portions||'',dish:d.dish||'',comments:[]};
   S.ev={...S.ev,tasks:[...(S.ev.tasks||[]),task]};
   S.newTaskForm=false;S.newTaskData={};
   await saveEv();
@@ -504,6 +517,12 @@ function renderEvInfo(){
       <div>${fl('Dietary requirements')}<textarea onchange="sfEv('dietary',this.value)">${(ev.dietary||'').replace(/</g,'&lt;')}</textarea></div>
       <div>${fl('Internal notes')}<textarea onchange="sfEv('notes',this.value)">${(ev.notes||'').replace(/</g,'&lt;')}</textarea></div>
     </div></div>
+    <div>
+      <div class="section-label">Agreed menu</div>
+      <div style="font-size:12px;color:var(--text2);margin-bottom:8px">Write down the dishes agreed with the client. Tasks can reference these dishes.</div>
+      <textarea onchange="sfEv('menu',this.value)" style="min-height:140px;font-size:14px;line-height:1.7">${(ev.menu||'').replace(/</g,'&lt;')}</textarea>
+      ${ev.menu?`<div style="margin-top:10px;padding:12px 14px;background:var(--gold-50);border:0.5px solid var(--gold-500);border-radius:var(--r);font-size:13px;line-height:1.7;white-space:pre-wrap">${ev.menu.replace(/</g,'&lt;')}</div>`:''}
+    </div>
   </div>`;
 }
 
@@ -526,6 +545,10 @@ function renderEvLines(type){return renderLines(type,S.ev,'updEvLine','addEvLine
 function renderFinancialView(ev){
   const tR=sum(ev.revenues||[]),tC=sum(ev.costs||[]),vatR=vatSum(ev.revenues||[]),vatC=vatSum(ev.costs||[]),mg=tR-tC,m=margin(tR,tC);
   const guests=parseFloat(ev.guests)||0;
+  // Profit after VAT = gross margin - net VAT to pay
+  const netVat=vatR-vatC; // amount to remit to tax authority
+  const profitAfterVat=mg-netVat;
+  const profitMarginAfterVat=(tR+vatR)>0?(profitAfterVat/(tR+vatR))*100:0;
   const alertStyle=m>=40?`background:var(--green-bg);color:var(--green-fg)`:m>=30?`background:var(--amber-bg);color:var(--amber-fg)`:`background:var(--red-bg);color:var(--red-fg)`;
   const alertT=m>=40?'Healthy margin.':m>=30?'Margin on the low side. Consider raising the price.':'Margin too low. Aim for 30%+.';
   const row=(l,v,h=false)=>`<div class="result-row${h?' highlight':''}"><span class="r-label">${l}</span><span class="r-value">${v}</span></div>`;
@@ -535,7 +558,15 @@ function renderFinancialView(ev){
     <div class="card"><div style="padding:10px 16px;background:var(--bg2);border-bottom:0.5px solid var(--border)"><div class="section-label" style="margin:0">Result</div></div>
     ${row('Revenue (excl. VAT)',fmt(tR))}${row('Costs (excl. VAT)',fmt(tC))}${row('Gross margin',fmt(mg),true)}${row('Margin %',mBadge(m),true)}
     ${guests>0?row('Revenue per guest',fmt(tR/guests)):''}${guests>0?row('Margin per guest',fmt(mg/guests)):''}
-    ${row('VAT to remit',fmt(vatR))}${row('VAT to reclaim',fmt(vatC))}${row('Net VAT',fmt(vatR-vatC))}</div>
+    ${row('VAT to remit',fmt(vatR))}${row('VAT to reclaim',fmt(vatC))}${row('Net VAT position',fmt(netVat))}</div>
+    <div class="card" style="border:1.5px solid var(--brand-gold)">
+      <div style="padding:10px 16px;background:var(--gold-50);border-bottom:0.5px solid var(--brand-gold)"><div class="section-label" style="margin:0;color:var(--gold-900)">Profit after VAT</div></div>
+      ${row('Gross margin (excl. VAT)',fmt(mg))}
+      ${row('Net VAT to remit',fmt(-netVat))}
+      <div class="result-row highlight"><span class="r-label" style="font-weight:600;color:var(--navy-900)">Net profit after VAT</span><span class="r-value" style="font-size:16px;font-weight:700;color:${profitAfterVat>=0?'var(--green-fg)':'var(--red-fg)'}">${fmt(profitAfterVat)}</span></div>
+      <div class="result-row"><span class="r-label" style="color:var(--text2)">Net profit margin (on incl. revenue)</span><span class="r-value">${profitMarginAfterVat.toFixed(1)}%</span></div>
+      ${guests>0?`<div class="result-row"><span class="r-label" style="color:var(--text2)">Net profit per guest</span><span class="r-value">${fmt(profitAfterVat/guests)}</span></div>`:''}
+    </div>
     ${tR>0?`<div class="alert" style="${alertStyle}">${alertT}</div>`:''}</div>`;
 }
 
@@ -644,6 +675,7 @@ function renderNewTaskForm(){
       <div>${fl('Prep by time')}<input type="time" value="${d.prepBy||''}" onchange="setNTD('prepBy',this.value)"></div>
       <div>${fl('Serve by time')}<input type="time" value="${d.serveBy||''}" onchange="setNTD('serveBy',this.value)"></div>
       <div>${fl('Portions')}<input type="number" value="${d.portions||''}" placeholder="0" onchange="setNTD('portions',this.value)"></div>
+      <div style="grid-column:1/-1">${fl('Dish / menu item')}<input value="${(d.dish||'').replace(/"/g,'&quot;')}" placeholder="e.g. Chicken springrolls, Pho Bo..." onchange="setNTD('dish',this.value)" list="menu-dishes-ntf"><datalist id="menu-dishes-ntf">${(S.ev?.menu||'').split('\n').map(l=>l.trim()).filter(Boolean).map(l=>`<option value="${l.replace(/"/g,'&quot;')}">`).join('')}</datalist></div>
     </div>
     <div style="margin-bottom:12px">
       <div class="field-label" style="margin-bottom:8px">Allergen flags</div>
@@ -680,6 +712,7 @@ function renderTaskDetail(){
         <div>${fl('Prep by')}<input type="time" value="${t.prepBy||''}" onchange="updateTask('prepBy',this.value)"></div>
         <div>${fl('Serve by')}<input type="time" value="${t.serveBy||''}" onchange="updateTask('serveBy',this.value)"></div>
         <div>${fl('Portions')}<input type="number" value="${t.portions||''}" placeholder="0" onchange="updateTask('portions',this.value)"></div>
+        <div style="grid-column:1/-1">${fl('Dish / menu item')}<input value="${(t.dish||'').replace(/"/g,'&quot;')}" placeholder="e.g. Chicken springrolls, Pho Bo..." onchange="updateTask('dish',this.value)" list="menu-dishes-td"><datalist id="menu-dishes-td">${(S.ev?.menu||'').split('\n').map(l=>l.trim()).filter(Boolean).map(l=>`<option value="${l.replace(/"/g,'&quot;')}">`).join('')}</datalist></div>
       </div>
       <div style="margin-bottom:1.25rem">
         <div class="field-label" style="margin-bottom:8px">Allergen flags</div>
@@ -701,6 +734,7 @@ function taskCard(t){
     <div class="task-card-title">${t.title||'Untitled'}</div>
     <div class="task-card-meta">
       ${t.category?`<span class="badge" style="background:var(--bg2);color:var(--text2);font-weight:400">${t.category}</span>`:''}
+      ${t.dish?`<span class="badge" style="background:var(--gold-50);color:var(--gold-900);font-weight:400">${t.dish}</span>`:''}
       ${t.deadline&&t.status!=='Done'?`<span style="color:${hasDeadline?'#a32d2d':'var(--text2)'}">Due: ${fmtDate(t.deadline)}</span>`:''}
       ${t.serveBy?`<span>Serve: ${t.serveBy}</span>`:''}
       ${t.assignee?`<span>${t.assignee}</span>`:''}
@@ -846,22 +880,20 @@ function renderAdminOverview(){
 
 function renderAdminDetail(){
   const ev=S.adminEv;if(!ev)return'';
-  const sc=SC[ev.status]||SC['Quote sent'];
-  const tabs=[['info','Info'],['costs','Costs'],['revenues','Revenue'],['financial','Financial']];
+  if(S.adminTab==='info'||!['costs','revenues','financial'].includes(S.adminTab))S.adminTab='costs';
+  const tabs=[['costs','Costs'],['revenues','Revenue'],['financial','Financial']];
   let content='';
-  if(S.adminTab==='info')content=renderAdminInfo();
-  else if(S.adminTab==='costs')content=renderLines('costs',S.adminEv,'updAdminLine','addAdminLine','delAdminLine','uploadAdminLineFile','delAdminLineFile');
+  if(S.adminTab==='costs')content=renderLines('costs',S.adminEv,'updAdminLine','addAdminLine','delAdminLine','uploadAdminLineFile','delAdminLineFile');
   else if(S.adminTab==='revenues')content=renderLines('revenues',S.adminEv,'updAdminLine','addAdminLine','delAdminLine','uploadAdminLineFile','delAdminLineFile');
   else if(S.adminTab==='financial')content=renderFinancialView(S.adminEv);
   return`<button class="back-btn" onclick="backAdmin()">&#8249; Admin</button>
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.25rem;gap:12px;flex-wrap:wrap">
       <div style="flex:1;min-width:0">
-        <div style="font-size:22px;font-weight:600;letter-spacing:-0.025em">${ev.name||'Untitled'}</div>
+        <div style="font-family:var(--font-display);font-size:22px;font-weight:700">${ev.name||'Untitled'}</div>
         <div class="subtitle" style="margin-top:4px">${ev.client||'No client'}${ev.date?' · '+fmtDate(ev.date):''}${ev.venue?' · '+ev.venue:''}</div>
       </div>
       <div class="detail-actions">
         ${sBadge(ev.status)}
-        <button class="btn-ghost" style="font-size:12px;padding:6px 12px" onclick="openEv(${ev.id},'planner')">Open in Planner &#8250;</button>
         <button class="btn-primary" onclick="saveAdmin()">${S.adminSaving?'<div class="spinner" style="width:14px;height:14px;border-width:1.5px;filter:invert(1);display:inline-block"></div>':'Save'}</button>
         ${S.adminSaved?'<span style="font-size:12px;color:var(--green-fg);font-weight:500">&#10003; Saved</span>':''}
       </div>
@@ -963,7 +995,7 @@ function renderHome(){
   const tR=S.events.reduce((a,e)=>a+sum(e.revenues||[]),0);
   const openTasks=S.events.reduce((a,e)=>a+(e.tasks||[]).filter(t=>t.status!=='Done').length,0);
   return`
-    <div style="margin-bottom:1.5rem"><div class="title">The Hangout</div><div class="subtitle">Catering management</div></div>
+    <div style="margin-bottom:1.5rem"><div class="title" style="font-size:28px">The Hangout Project Manager</div><div class="subtitle" style="color:var(--teal-500);font-weight:600;letter-spacing:0.06em;text-transform:uppercase;font-size:11px;margin-top:4px">Catering Management Platform</div></div>
     <div class="home-grid">
       <div class="home-card" onclick="go('events')">
         <div class="home-card-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
