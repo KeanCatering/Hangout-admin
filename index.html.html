@@ -240,8 +240,21 @@ function weekLabel(dateStr){if(!dateStr)return'Unscheduled';const d=new Date(dat
 function go(s){S.section=s;render();}
 function renderNav(){
   const links=[['home','Home'],['events','Events'],['catering','Planner'],['admin','Admin'],['team','Team']];
-  const logo=`<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="11" fill="#FFD243"/><path d="M7 8.5C7 7.67 7.67 7 8.5 7h7C16.33 7 17 7.67 17 8.5v5c0 .83-.67 1.5-1.5 1.5H13l-2 2.5V15H8.5C7.67 15 7 14.33 7 13.5v-5z" fill="#004255"/></svg>`;
-  document.getElementById('nav').innerHTML=`<div class="global-nav-inner"><div class="nav-brand">${logo}<span>The Hangout <span style="color:var(--brand-gold);font-weight:800">PM</span></span></div>${links.map(([s,l])=>`<button class="nav-link${S.section===s?' active':''}" onclick="go('${s}')">${l}</button>`).join('')}</div>`;
+  const logo=`<svg width="32" height="32" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="50" cy="50" r="47" stroke="#FFD243" stroke-width="3.5" fill="none"/>
+    <circle cx="50" cy="50" r="41" stroke="#FFD243" stroke-width="2" fill="none"/>
+    <g fill="#FFD243">
+      <rect x="22" y="22" width="7" height="56"/>
+      <rect x="22" y="22" width="27" height="7"/>
+      <rect x="22" y="48" width="27" height="6"/>
+      <rect x="42" y="22" width="7" height="34"/>
+      <rect x="49" y="22" width="7" height="56"/>
+      <rect x="49" y="22" width="29" height="7"/>
+      <rect x="49" y="48" width="29" height="6"/>
+      <rect x="71" y="22" width="7" height="34"/>
+    </g>
+  </svg>`;
+  document.getElementById('nav').innerHTML=`<div class="global-nav-inner"><div class="nav-brand">${logo}<span style="font-family:var(--font-display);font-size:15px;font-weight:700;letter-spacing:0.01em">The Hangout <span style="color:var(--brand-gold)">PM</span></span></div>${links.map(([s,l])=>`<button class="nav-link${S.section===s?' active':''}" onclick="go('${s}')">${l}</button>`).join('')}</div>`;
 }
 
 /* ── DATA LOADING ── */
@@ -328,16 +341,21 @@ async function removeNeed(id){
 
 /* ── TASKS ── */
 function openNewTaskForm(){
-  S.newTaskData={title:'',category:TASK_CATS[0],assignee:'',plannedDate:'',deadline:'',prepBy:'',serveBy:'',allergens:[],portions:'',status:'To Do',dish:''};
+  S.newTaskData={title:'',category:TASK_CATS[0],assignees:[],plannedDate:'',deadline:'',allergens:[],portions:'',status:'To Do'};
   S.newTaskForm=true;render();
 }
 function setNTD(k,v){S.newTaskData={...S.newTaskData,[k]:v};}
+function toggleNTDAssignee(name){
+  const arr=S.newTaskData.assignees||[];
+  S.newTaskData={...S.newTaskData,assignees:arr.includes(name)?arr.filter(x=>x!==name):[...arr,name]};
+  render();
+}
 function toggleNTDAllergen(a){const al=S.newTaskData.allergens||[];S.newTaskData={...S.newTaskData,allergens:al.includes(a)?al.filter(x=>x!==a):[...al,a]};render();}
 
 async function createTask(){
   const d=S.newTaskData;
   if(!d.title?.trim()){alert('Enter a task title.');return;}
-  const task={id:uid(),title:d.title.trim(),category:d.category||TASK_CATS[0],status:d.status||'To Do',assignee:d.assignee||'',plannedDate:d.plannedDate||'',deadline:d.deadline||'',prepBy:d.prepBy||'',serveBy:d.serveBy||'',allergens:d.allergens||[],portions:d.portions||'',dish:d.dish||'',comments:[]};
+  const task={id:uid(),title:d.title.trim(),category:d.category||TASK_CATS[0],status:d.status||'To Do',assignees:d.assignees||[],assignee:(d.assignees||[])[0]||'',plannedDate:d.plannedDate||'',deadline:d.deadline||'',allergens:d.allergens||[],portions:d.portions||'',comments:[]};
   S.ev={...S.ev,tasks:[...(S.ev.tasks||[]),task]};
   S.newTaskForm=false;S.newTaskData={};
   await saveEv();
@@ -349,6 +367,12 @@ function openTask(taskId){
 }
 function backToPlanner(){S.evTab='planner';S.task=null;render();}
 
+async function toggleTaskAssignee(name){
+  const arr=S.task.assignees||[];
+  const updated=arr.includes(name)?arr.filter(x=>x!==name):[...arr,name];
+  await updateTask('assignees',updated);
+  await updateTask('assignee',updated[0]||'');
+}
 async function updateTask(field,value){
   S.task={...S.task,[field]:value};
   S.ev={...S.ev,tasks:(S.ev.tasks||[]).map(t=>t.id===S.task.id?{...S.task}:t)};
@@ -669,11 +693,9 @@ function renderNewTaskForm(){
       <div>${fl('Task title')}<input id="ntd-title" placeholder="e.g. Prepare appetizers" value="${(d.title||'').replace(/"/g,'&quot;')}" oninput="setNTD('title',this.value)"></div>
       <div>${fl('Category')}<select onchange="setNTD('category',this.value)">${TASK_CATS.map(c=>`<option${c===d.category?' selected':''}>${c}</option>`).join('')}</select></div>
       <div>${fl('Status')}<select onchange="setNTD('status',this.value)">${TASK_STATUSES.map(s=>`<option${s===d.status?' selected':''}>${s}</option>`).join('')}</select></div>
-      <div>${fl('Assignee')}<select onchange="setNTD('assignee',this.value)"><option value="">— Unassigned —</option>${teamOptions.map(n=>`<option${n===d.assignee?' selected':''}>${n}</option>`).join('')}</select></div>
+      <div style="grid-column:1/-1">${fl('Assignees (select multiple)')}<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px">${S.team.length===0?`<span style="font-size:13px;color:var(--text2)">No team members yet</span>`:S.team.map(m=>{const sel=(d.assignees||[]).includes(m.name);return`<button type="button" onclick="toggleNTDAssignee('${m.name}')" style="display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:99px;border:0.5px solid ${sel?'var(--brand-navy)':'var(--border2)'};background:${sel?'var(--navy-500)':'var(--bg2)'};color:${sel?'var(--cream-100)':'var(--text)'};font-size:13px;cursor:pointer;transition:all 0.15s">${avatar(m.name,22)}<span>${m.name}</span></button>`;}).join('')}</div></div>
       <div>${fl('Planned date')}<input type="date" value="${d.plannedDate||''}" onchange="setNTD('plannedDate',this.value)"></div>
       <div>${fl('Deadline')}<input type="date" value="${d.deadline||''}" onchange="setNTD('deadline',this.value)"></div>
-      <div>${fl('Prep by time')}<input type="time" value="${d.prepBy||''}" onchange="setNTD('prepBy',this.value)"></div>
-      <div>${fl('Serve by time')}<input type="time" value="${d.serveBy||''}" onchange="setNTD('serveBy',this.value)"></div>
       <div>${fl('Portions')}<input type="number" value="${d.portions||''}" placeholder="0" onchange="setNTD('portions',this.value)"></div>
       <div style="grid-column:1/-1">${fl('Dish / menu item')}<input value="${(d.dish||'').replace(/"/g,'&quot;')}" placeholder="e.g. Chicken springrolls, Pho Bo..." onchange="setNTD('dish',this.value)" list="menu-dishes-ntf"><datalist id="menu-dishes-ntf">${(S.ev?.menu||'').split('\n').map(l=>l.trim()).filter(Boolean).map(l=>`<option value="${l.replace(/"/g,'&quot;')}">`).join('')}</datalist></div>
     </div>
@@ -706,11 +728,9 @@ function renderTaskDetail(){
     <div class="task-detail">
       <div class="grid-2" style="margin-bottom:1.25rem">
         <div>${fl('Category')}<select onchange="updateTask('category',this.value)">${TASK_CATS.map(c=>`<option${c===t.category?' selected':''}>${c}</option>`).join('')}</select></div>
-        <div>${fl('Assignee')}<select onchange="updateTask('assignee',this.value)"><option value="">— Unassigned —</option>${teamOptions.map(n=>`<option${n===t.assignee?' selected':''}>${n}</option>`).join('')}</select></div>
+        <div style="grid-column:1/-1">${fl('Assignees (select multiple)')}<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px">${S.team.length===0?`<span style="font-size:13px;color:var(--text2)">No team members yet</span>`:S.team.map(m=>{const sel=(t.assignees||[t.assignee].filter(Boolean)).includes(m.name);return`<button type="button" onclick="toggleTaskAssignee('${m.name}')" style="display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:99px;border:0.5px solid ${sel?'var(--brand-navy)':'var(--border2)'};background:${sel?'var(--navy-500)':'var(--bg2)'};color:${sel?'var(--cream-100)':'var(--text)'};font-size:13px;cursor:pointer;transition:all 0.15s">${avatar(m.name,22)}<span>${m.name}</span></button>`;}).join('')}</div></div>
         <div>${fl('Planned date')}<input type="date" value="${t.plannedDate||''}" onchange="updateTask('plannedDate',this.value)"></div>
         <div>${fl('Deadline')}<input type="date" value="${t.deadline||''}" onchange="updateTask('deadline',this.value)"></div>
-        <div>${fl('Prep by')}<input type="time" value="${t.prepBy||''}" onchange="updateTask('prepBy',this.value)"></div>
-        <div>${fl('Serve by')}<input type="time" value="${t.serveBy||''}" onchange="updateTask('serveBy',this.value)"></div>
         <div>${fl('Portions')}<input type="number" value="${t.portions||''}" placeholder="0" onchange="updateTask('portions',this.value)"></div>
         <div style="grid-column:1/-1">${fl('Dish / menu item')}<input value="${(t.dish||'').replace(/"/g,'&quot;')}" placeholder="e.g. Chicken springrolls, Pho Bo..." onchange="updateTask('dish',this.value)" list="menu-dishes-td"><datalist id="menu-dishes-td">${(S.ev?.menu||'').split('\n').map(l=>l.trim()).filter(Boolean).map(l=>`<option value="${l.replace(/"/g,'&quot;')}">`).join('')}</datalist></div>
       </div>
@@ -734,10 +754,10 @@ function taskCard(t){
     <div class="task-card-title">${t.title||'Untitled'}</div>
     <div class="task-card-meta">
       ${t.category?`<span class="badge" style="background:var(--bg2);color:var(--text2);font-weight:400">${t.category}</span>`:''}
-      ${t.dish?`<span class="badge" style="background:var(--gold-50);color:var(--gold-900);font-weight:400">${t.dish}</span>`:''}
+
       ${t.deadline&&t.status!=='Done'?`<span style="color:${hasDeadline?'#a32d2d':'var(--text2)'}">Due: ${fmtDate(t.deadline)}</span>`:''}
-      ${t.serveBy?`<span>Serve: ${t.serveBy}</span>`:''}
-      ${t.assignee?`<span>${t.assignee}</span>`:''}
+
+      ${(t.assignees?.length?t.assignees:[t.assignee].filter(Boolean)).map(a=>`<span>${a}</span>`).join('')}
       ${allergenAlert}
     </div>
     <div style="margin-top:8px"><select style="font-size:11px;padding:3px 6px;border-radius:var(--r);background:var(--bg2);border:0.5px solid var(--border);color:var(--text2)" onchange="moveTask('${t.id}',this.value);event.stopPropagation()">${TASK_STATUSES.map(s=>`<option${s===t.status?' selected':''}>${s}</option>`).join('')}</select></div>
@@ -754,13 +774,20 @@ function renderKanban(tasks){
 }
 
 function renderEvTimeline(tasks){
-  const withTime=tasks.filter(t=>t.serveBy||t.prepBy).sort((a,b)=>(a.serveBy||a.prepBy||'').localeCompare(b.serveBy||b.prepBy||''));
-  const noTime=tasks.filter(t=>!t.serveBy&&!t.prepBy);
+  // Group tasks by plannedDate, then deadline, then unscheduled
+  const withDate=tasks.filter(t=>t.plannedDate||t.deadline).sort((a,b)=>(a.plannedDate||a.deadline||'').localeCompare(b.plannedDate||b.deadline||''));
+  const noDate=tasks.filter(t=>!t.plannedDate&&!t.deadline);
   const grouped={};
-  for(const t of withTime){const h=(t.serveBy||t.prepBy||'').slice(0,2);if(!grouped[h])grouped[h]=[];grouped[h].push(t);}
+  for(const t of withDate){const d=t.plannedDate||t.deadline;if(!grouped[d])grouped[d]=[];grouped[d].push(t);}
+  const today=new Date().toISOString().slice(0,10);
   return`<div class="tl-wrap">
-    ${Object.entries(grouped).map(([h,ts])=>`<div class="tl-day"><div class="tl-day-header">${h}:00</div>${ts.map(t=>`<div class="tl-item" onclick="openTask('${t.id}')"><div class="tl-time">${t.serveBy||t.prepBy}</div><div class="tl-body"><div class="tl-title">${t.title}</div><div class="tl-meta"><span>${t.category}</span><span>${t.status}</span>${t.assignee?`<span>${t.assignee}</span>`:''}</div></div></div>`).join('')}</div>`).join('')}
-    ${noTime.length>0?`<div class="tl-day"><div class="tl-day-header">Unscheduled</div>${noTime.map(t=>`<div class="tl-item" onclick="openTask('${t.id}')"><div class="tl-time">—</div><div class="tl-body"><div class="tl-title">${t.title}</div><div class="tl-meta"><span>${t.category}</span><span>${t.status}</span></div></div></div>`).join('')}</div>`:''}
+    ${Object.entries(grouped).map(([d,ts])=>{
+      const isPast=d<today;const isToday=d===today;
+      const label=isToday?`Today — ${fmtDate(d)}`:isPast?`Past — ${fmtDate(d)}`:fmtDate(d);
+      const color=isPast?'#a32d2d':isToday?'var(--teal-500)':'var(--text2)';
+      return`<div class="tl-day"><div class="tl-day-header" style="color:${color}">${label}</div>${ts.map(t=>`<div class="tl-item" onclick="openTask('${t.id}')"><div class="tl-time" style="min-width:28px">${t.status==='Done'?'✓':'•'}</div><div class="tl-body"><div class="tl-title">${t.title}</div><div class="tl-meta"><span>${t.category}</span><span class="badge" style="font-size:10px;padding:1px 7px;background:${t.status==='In Progress'?'var(--amber-bg)':t.status==='Done'?'var(--green-bg)':'var(--blue-bg)'};color:${t.status==='In Progress'?'var(--amber-fg)':t.status==='Done'?'var(--green-fg)':'var(--blue-fg)'}">${t.status}</span>${(t.assignees||[t.assignee]).filter(Boolean).map(a=>`<span>${a}</span>`).join('')}${t.deadline&&t.deadline!==d?`<span style="color:var(--text2)">Due: ${fmtDate(t.deadline)}</span>`:''}</div></div></div>`).join('')}</div>`;
+    }).join('')}
+    ${noDate.length>0?`<div class="tl-day"><div class="tl-day-header" style="color:var(--text3)">Unscheduled (${noDate.length})</div>${noDate.map(t=>`<div class="tl-item" onclick="openTask('${t.id}')"><div class="tl-time" style="min-width:28px">—</div><div class="tl-body"><div class="tl-title">${t.title}</div><div class="tl-meta"><span>${t.category}</span><span>${t.status}</span></div></div></div>`).join('')}</div>`:''}
   </div>`;
 }
 
@@ -789,7 +816,7 @@ function renderPlanner(){
     const tasks=ev.tasks||[];
     const done=tasks.filter(t=>t.status==='Done').length;
     const pct=tasks.length>0?Math.round(done/tasks.length*100):0;
-    const openList=tasks.filter(t=>t.status!=='Done').sort((a,b)=>(a.serveBy||a.prepBy||a.deadline||'zz').localeCompare(b.serveBy||b.prepBy||b.deadline||'zz'));
+    const openList=tasks.filter(t=>t.status!=='Done').sort((a,b)=>(a.plannedDate||a.deadline||'zz').localeCompare(b.plannedDate||b.deadline||'zz'));
     const cd=countdown(ev.date);
     const cdColor=cd==='Today'||cd==='Tomorrow'?'#854f0b':cd==='Past'?'#a32d2d':'var(--text2)';
     return`<div class="plan-ev-block">
@@ -808,13 +835,13 @@ function renderPlanner(){
         :openList.length===0
         ?`<div style="font-size:12px;color:var(--text3);padding:6px 0">No tasks yet. <button class="btn-ghost" style="padding:3px 8px;font-size:11px" onclick="openEv(${ev.id},'planner')">Add tasks &#8250;</button></div>`
         :openList.map(t=>`<div class="tl-item" onclick="openEv(${ev.id},'planner');setTimeout(()=>{openTask('${t.id}');},100)">
-          <div class="tl-time">${t.serveBy||t.prepBy||'—'}</div>
+          <div class="tl-time">${t.plannedDate?fmtDate(t.plannedDate):'—'}</div>
           <div class="tl-body">
             <div class="tl-title">${t.title||'Untitled'}</div>
             <div class="tl-meta">
               <span class="badge" style="background:var(--bg2);color:var(--text2);font-size:10px;padding:1px 7px;font-weight:400">${t.category}</span>
               <span class="badge" style="font-size:10px;padding:1px 7px;background:${t.status==='In Progress'?'var(--amber-bg)':'var(--blue-bg)'};color:${t.status==='In Progress'?'var(--amber-fg)':'var(--blue-fg)'}">${t.status}</span>
-              ${t.assignee?`<span>${t.assignee}</span>`:''}
+              ${(t.assignees?.length?t.assignees:[t.assignee].filter(Boolean)).map(a=>`<span>${a}</span>`).join('')}
               ${t.deadline?`<span style="color:${new Date(t.deadline)<new Date()&&t.status!=='Done'?'#a32d2d':'var(--text2)'}">Due: ${fmtDate(t.deadline)}</span>`:''}
               ${t.allergens?.length?`<span style="color:#a32d2d">&#9888; ${t.allergens.join(', ')}</span>`:''}
             </div>
