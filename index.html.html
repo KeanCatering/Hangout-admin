@@ -197,7 +197,7 @@ const REV_CATS=['Catering','Drinks package','Staff (charged)','Equipment (charge
 const VAT={'9%':0.09,'21%':0.21,'0%':0};
 const EV_STATUSES=['Quote sent','Confirmed','In progress','Completed','Cancelled'];
 const SC={'Quote sent':{bg:'#e6f1fb',fg:'#185fa5'},'Confirmed':{bg:'#eaf3de',fg:'#3b6d11'},'In progress':{bg:'#faeeda',fg:'#854f0b'},'Completed':{bg:'#d4f0e4',fg:'#0f6e56'},'Cancelled':{bg:'#fcebeb',fg:'#a32d2d'}};
-const TASK_CATS=['Prep','Kitchen','Logistics','Service'];
+const TASK_CATS=['Food','Facilities','Logistics','Administration'];
 const TASK_STATUSES=['To Do','In Progress','Done'];
 const ALLERGENS=['Nuts','Gluten','Dairy','Shellfish','Vegan','Other'];
 const ROLES=['Head Chef','Sous Chef','Server','Driver','Event Coordinator','Other'];
@@ -213,6 +213,7 @@ let S={
   // Events (shared source of truth)
   evView:'list',events:[],ev:null,evTab:'info',evSaving:false,evSaved:false,
   catTab:'kanban',task:null,newTaskForm:false,newNeedForm:false,newTaskData:{},plannerEvId:null,
+  genTasks:[],genTaskForm:false,genTaskData:{},editingGenTaskId:null,
   // Team
   team:[],newTeamForm:false,editingTeamId:null,
   // Admin (financial view of events - same data)
@@ -239,7 +240,7 @@ function weekLabel(dateStr){if(!dateStr)return'Unscheduled';const d=new Date(dat
 /* ── NAV ── */
 function go(s){S.section=s;render();}
 function renderNav(){
-  const links=[['home','Home'],['events','Events'],['catering','Planner'],['admin','Admin'],['team','Team']];
+  const links=[['home','Home'],['events','Events'],['catering','Planner'],['admin','Admin'],['tasks','Tasks'],['team','Team']];
   const logo=`<svg width="34" height="34" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
     <circle cx="50" cy="50" r="46" stroke="#FFD243" stroke-width="4" fill="none"/>
     <circle cx="50" cy="50" r="39" stroke="#FFD243" stroke-width="2" fill="none"/>
@@ -282,7 +283,7 @@ async function loadTeam(){
    EVENTS — single source of truth
 ══════════════════════════════════════════ */
 function newEv(){
-  S.ev={name:'',client:'',contact:'',email:'',phone:'',date:'',time:'',venue:'',address:'',event_type:'',guests:'',status:'Quote sent',description:'',requirements:'',dietary:'',notes:'',menu:'',costs:[],revenues:[],attachments:[],customer_needs:[],tasks:[],team_assignments:[]};
+  S.ev={name:'',client:'',contact:'',email:'',phone:'',start_date:'',end_date:'',start_time:'',end_time:'',date:'',time:'',venue:'',address:'',event_type:'',guests:'',status:'Quote sent',description:'',requirements:'',dietary:'',notes:'',menu:'',menu_items:[],ingredients:[],costs:[],revenues:[],attachments:[],customer_needs:[],tasks:[],team_assignments:[]};
   S.evTab='info';S.evView='detail';S.section='events';render();
 }
 function openEv(id,tab='info'){
@@ -306,7 +307,7 @@ function setEvTab(t){S.evTab=t;S.task=null;render();}
 async function saveEv(silent=false){
   if(!silent){S.evSaving=true;render();}
   const ev=S.ev;
-  const pl={name:ev.name||'',client:ev.client||'',contact:ev.contact||'',email:ev.email||'',phone:ev.phone||'',date:ev.date||'',time:ev.time||'',venue:ev.venue||'',address:ev.address||'',event_type:ev.event_type||'',guests:parseInt(ev.guests)||0,status:ev.status||'Quote sent',description:ev.description||'',requirements:ev.requirements||'',dietary:ev.dietary||'',notes:ev.notes||'',menu:ev.menu||'',costs:ev.costs||[],revenues:ev.revenues||[],attachments:ev.attachments||[],customer_needs:ev.customer_needs||[],tasks:ev.tasks||[],team_assignments:ev.team_assignments||[]};
+  const pl={name:ev.name||'',client:ev.client||'',contact:ev.contact||'',email:ev.email||'',phone:ev.phone||'',start_date:ev.start_date||'',end_date:ev.end_date||'',start_time:ev.start_time||'',end_time:ev.end_time||'',date:ev.start_date||ev.date||'',time:ev.start_time||ev.time||'',venue:ev.venue||'',address:ev.address||'',event_type:ev.event_type||'',guests:parseInt(ev.guests)||0,status:ev.status||'Quote sent',description:ev.description||'',requirements:ev.requirements||'',dietary:ev.dietary||'',notes:ev.notes||'',menu:ev.menu||'',menu_items:ev.menu_items||[],ingredients:ev.ingredients||[],costs:ev.costs||[],revenues:ev.revenues||[],attachments:ev.attachments||[],customer_needs:ev.customer_needs||[],tasks:ev.tasks||[],team_assignments:ev.team_assignments||[]};
   try{
     if(ev.id&&S.events.find(x=>x.id===ev.id)){
       const{error}=await db.from('events').update(pl).eq('id',ev.id);
@@ -339,6 +340,21 @@ function updEvLine(type,id,k,v){sfEv(type,(S.ev[type]||[]).map(r=>r.id===id?{...
 function delEvLine(type,id){sfEv(type,(S.ev[type]||[]).filter(r=>r.id!==id));render();}
 
 /* ── CUSTOMER NEEDS ── */
+function addMenuItem(){
+  const items=[...(S.ev.menu_items||[])];
+  items.push({course:'',dish:'',qty:'',presentation:''});
+  sfEv('menu_items',items);render();
+}
+function updMenuItem(i,field,value){
+  const items=[...(S.ev.menu_items||[])];
+  if(items[i])items[i]={...items[i],[field]:value};
+  sfEv('menu_items',items);
+}
+function delMenuItem(i){
+  const items=[...(S.ev.menu_items||[])];
+  items.splice(i,1);
+  sfEv('menu_items',items);render();
+}
 async function addNeed(){
   const text=(document.getElementById('need-text')?.value||'').trim();
   const count=document.getElementById('need-count')?.value||0;
@@ -537,9 +553,11 @@ function renderEvInfo(){
       <div>${fl('Phone')}<input type="tel" value="${(ev.phone||'').replace(/"/g,'&quot;')}" onchange="sfEv('phone',this.value)"></div>
     </div></div>
     <div><div class="section-label">Event details</div><div class="grid-3">
-      <div>${fl('Date')}<input type="date" value="${ev.date||''}" onchange="sfEv('date',this.value)"></div>
-      <div>${fl('Time')}<input type="time" value="${ev.time||''}" onchange="sfEv('time',this.value)"></div>
+      <div>${fl('Start date')}<input type="date" value="${ev.start_date||ev.date||''}" onchange="sfEv('start_date',this.value);sfEv('date',this.value)"></div>
+      <div>${fl('Start time')}<input type="time" value="${ev.start_time||ev.time||''}" onchange="sfEv('start_time',this.value);sfEv('time',this.value)"></div>
       <div>${fl('Event type')}<input value="${(ev.event_type||'').replace(/"/g,'&quot;')}" onchange="sfEv('event_type',this.value)"></div>
+      <div>${fl('End date')}<input type="date" value="${ev.end_date||''}" onchange="sfEv('end_date',this.value)"></div>
+      <div>${fl('End time')}<input type="time" value="${ev.end_time||''}" onchange="sfEv('end_time',this.value)"></div>
       <div>${fl('Guests')}<input type="number" value="${ev.guests||''}" onchange="sfEv('guests',this.value)"></div>
       <div>${fl('Venue')}<input value="${(ev.venue||'').replace(/"/g,'&quot;')}" onchange="sfEv('venue',this.value)"></div>
       <div>${fl('Address')}<input value="${(ev.address||'').replace(/"/g,'&quot;')}" onchange="sfEv('address',this.value)"></div>
@@ -551,10 +569,28 @@ function renderEvInfo(){
       <div>${fl('Internal notes')}<textarea onchange="sfEv('notes',this.value)">${(ev.notes||'').replace(/</g,'&lt;')}</textarea></div>
     </div></div>
     <div>
-      <div class="section-label">Agreed menu</div>
-      <div style="font-size:12px;color:var(--text2);margin-bottom:8px">Dishes agreed with the client.</div>
-      <textarea onchange="sfEv('menu',this.value)" style="min-height:120px;font-size:14px;line-height:1.7">${(ev.menu||'').replace(/</g,'&lt;')}</textarea>
-      ${ev.menu?`<div style="margin-top:8px;padding:12px 14px;background:var(--gold-50);border:0.5px solid var(--gold-500);border-radius:var(--r);font-size:13px;line-height:1.7;white-space:pre-wrap">${ev.menu.replace(/</g,'&lt;')}</div>`:''}
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div class="section-label" style="margin:0">Agreed menu</div>
+        <button class="btn-ghost" style="padding:4px 10px;font-size:12px" onclick="addMenuItem()">+ Add dish</button>
+      </div>
+      <div class="card" style="overflow:visible">
+        <div style="display:grid;grid-template-columns:1fr 2fr 80px 1.5fr 32px;background:var(--bg2);border-bottom:0.5px solid var(--border);padding:8px 12px;gap:8px">
+          <div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em">Course</div>
+          <div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em">Dish</div>
+          <div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em">Qty</div>
+          <div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em">Presentation</div>
+          <div></div>
+        </div>
+        ${(ev.menu_items||[]).length===0
+          ?`<div style="padding:1.5rem;text-align:center;color:var(--text2);font-size:13px">No dishes yet. Click "+ Add dish" to start.</div>`
+          :(ev.menu_items||[]).map((m,i)=>`<div style="display:grid;grid-template-columns:1fr 2fr 80px 1.5fr 32px;padding:8px 12px;gap:8px;align-items:center;border-bottom:0.5px solid var(--border)">
+            <input value="${(m.course||'').replace(/"/g,'&quot;')}" placeholder="Starter" style="font-size:13px" onchange="updMenuItem(${i},'course',this.value)">
+            <input value="${(m.dish||'').replace(/"/g,'&quot;')}" placeholder="Dish name" style="font-size:13px" onchange="updMenuItem(${i},'dish',this.value)">
+            <input type="number" value="${m.qty||''}" placeholder="0" style="font-size:13px;text-align:center" onchange="updMenuItem(${i},'qty',this.value)">
+            <input value="${(m.presentation||'').replace(/"/g,'&quot;')}" placeholder="e.g. cut into 4 pieces" style="font-size:13px" onchange="updMenuItem(${i},'presentation',this.value)">
+            <button class="btn-icon" style="color:#a32d2d;font-size:16px;padding:4px" onclick="delMenuItem(${i})">×</button>
+          </div>`).join('')}
+      </div>
     </div>
     <div>
       <div class="card">
@@ -820,23 +856,92 @@ function renderPlannerEventView(){
   if(S.catTab==='kanban')viewContent=renderKanban(tasks);
   else if(S.catTab==='timeline')viewContent=renderEvTimeline(tasks);
   else if(S.catTab==='categories')viewContent=renderCategories(tasks);
+  else if(S.catTab==='ingredients')viewContent=renderIngredients(ev);
   const cd=countdown(ev.date);
+  const showAddTask=S.catTab!=='ingredients';
   return`
     <button class="back-btn" onclick="S.plannerEvId=null;S.ev=null;S.newTaskForm=false;render()">&#8249; Planner</button>
     <div style="margin-bottom:1.25rem">
       <div style="font-family:var(--font-display);font-size:22px;font-weight:700">${ev.name||'Untitled'}</div>
-      <div class="subtitle">${ev.client||''}${ev.date?' · '+fmtDate(ev.date):''}${ev.venue?' · '+ev.venue:''} · <span style="color:${cd==='Today'||cd==='Tomorrow'?'#854f0b':cd==='Past'?'#a32d2d':'var(--text2)'}">${cd}</span></div>
+      <div class="subtitle">${ev.client||''}${ev.start_date||ev.date?' · '+fmtDate(ev.start_date||ev.date):''}${ev.venue?' · '+ev.venue:''} · <span style="color:${cd==='Today'||cd==='Tomorrow'?'#854f0b':cd==='Past'?'#a32d2d':'var(--text2)'}">${cd}</span></div>
     </div>
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:8px">
       <div class="tabs" style="margin-bottom:0">
-        <button class="tab-btn${S.catTab==='kanban'?' active':''}" onclick="S.catTab='kanban';render()">Kanban</button>
-        <button class="tab-btn${S.catTab==='timeline'?' active':''}" onclick="S.catTab='timeline';render()">Timeline</button>
-        <button class="tab-btn${S.catTab==='categories'?' active':''}" onclick="S.catTab='categories';render()">Categories</button>
+        <button class="tab-btn${S.catTab==='kanban'?' active':''}" onclick="S.catTab='kanban';S.newTaskForm=false;render()">To-Do</button>
+        <button class="tab-btn${S.catTab==='timeline'?' active':''}" onclick="S.catTab='timeline';S.newTaskForm=false;render()">Timeline</button>
+        <button class="tab-btn${S.catTab==='categories'?' active':''}" onclick="S.catTab='categories';S.newTaskForm=false;render()">Categories</button>
+        <button class="tab-btn${S.catTab==='ingredients'?' active':''}" onclick="S.catTab='ingredients';S.newTaskForm=false;render()">Ingredients</button>
       </div>
-      <button class="btn-primary" onclick="openNewTaskForm()">+ Add task</button>
+      ${showAddTask?`<button class="btn-primary" onclick="openNewTaskForm()">+ Add task</button>`:`<button class="btn-primary" onclick="addIngredient()">+ Add item</button>`}
     </div>
     ${S.newTaskForm?renderNewTaskForm():''}
     ${viewContent}`;
+}
+
+function addIngredient(){
+  const items=[...(S.ev.ingredients||[])];
+  items.push({id:uid(),item:'',qtyPerPortion:'',totalQtyFormula:'',unit:'g',store:'',done:false});
+  sfEv('ingredients',items);render();
+}
+function updIngredient(id,field,value){
+  sfEv('ingredients',(S.ev.ingredients||[]).map(r=>r.id===id?{...r,[field]:value}:r));
+}
+function toggleIngredientDone(id){
+  sfEv('ingredients',(S.ev.ingredients||[]).map(r=>r.id===id?{...r,done:!r.done}:r));
+  saveEv(true);
+}
+function delIngredient(id){
+  sfEv('ingredients',(S.ev.ingredients||[]).filter(r=>r.id!==id));render();
+}
+function evalFormula(formula,guests){
+  if(!formula)return'';
+  // Allow =expr with guest count as variable
+  try{
+    const expr=formula.replace(/^=/,'').replace(/guests/gi,String(guests||0));
+    const result=Function('"use strict";return('+expr+')')();
+    return isFinite(result)?Number(result).toFixed(2):'?';
+  }catch{return'?';}
+}
+
+function renderIngredients(ev){
+  const items=ev.ingredients||[];
+  const guests=parseInt(ev.guests)||0;
+  const UNITS=['g','kg','ml','l','pieces','cans','bags','bunches','tsp','tbsp','other'];
+  const done=items.filter(i=>i.done).length;
+  return`<div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div style="font-size:13px;color:var(--text2)">${done}/${items.length} items checked · ${guests} guests</div>
+    </div>
+    <div class="card" style="overflow:visible">
+      <div style="display:grid;grid-template-columns:2fr 1fr 1.2fr 80px 1fr 32px 32px;background:var(--bg2);border-bottom:0.5px solid var(--border);padding:8px 12px;gap:8px">
+        <div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em">Item</div>
+        <div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em">Per portion</div>
+        <div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em">Total qty (=formula)</div>
+        <div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em">Unit</div>
+        <div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em">Store</div>
+        <div></div><div></div>
+      </div>
+      ${items.length===0?`<div style="padding:1.5rem;text-align:center;color:var(--text2);font-size:13px">No ingredients yet.</div>`:items.map(r=>{
+        const calc=evalFormula(r.totalQtyFormula,guests);
+        const isDone=!!r.done;
+        return`<div style="display:grid;grid-template-columns:2fr 1fr 1.2fr 80px 1fr 32px 32px;padding:8px 12px;gap:8px;align-items:center;border-bottom:0.5px solid var(--border);opacity:${isDone?'0.55':'1'}">
+          <input value="${(r.item||'').replace(/"/g,'&quot;')}" placeholder="e.g. chicken breast" style="font-size:13px${isDone?';text-decoration:line-through':''}" onchange="updIngredient('${r.id}','item',this.value)">
+          <input value="${(r.qtyPerPortion||'').replace(/"/g,'&quot;')}" placeholder="e.g. 100g" style="font-size:13px" onchange="updIngredient('${r.id}','qtyPerPortion',this.value)">
+          <div style="position:relative">
+            <input value="${(r.totalQtyFormula||'').replace(/"/g,'&quot;')}" placeholder="=100*guests" style="font-size:12px;padding-right:${calc?'48px':'12px'}" onchange="updIngredient('${r.id}','totalQtyFormula',this.value);render()">
+            ${calc?`<span style="position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:11px;font-weight:600;color:var(--teal-500)">${calc}</span>`:''}
+          </div>
+          <select style="font-size:12px" onchange="updIngredient('${r.id}','unit',this.value)">${UNITS.map(u=>`<option${u===r.unit?' selected':''}>${u}</option>`).join('')}</select>
+          <input value="${(r.store||'').replace(/"/g,'&quot;')}" placeholder="Store" style="font-size:13px" onchange="updIngredient('${r.id}','store',this.value)">
+          <button onclick="toggleIngredientDone('${r.id}')" style="background:${isDone?'var(--green-bg)':'var(--bg2)'};border:0.5px solid ${isDone?'var(--green-fg)':'var(--border2)'};border-radius:var(--r);width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;flex-shrink:0">${isDone?'✓':'○'}</button>
+          <button class="btn-icon" style="color:#a32d2d;font-size:16px;padding:4px" onclick="delIngredient('${r.id}')">×</button>
+        </div>`;
+      }).join('')}
+      <div style="padding:10px 12px;border-top:0.5px solid var(--border);display:flex;gap:8px">
+        <button class="btn-ghost" onclick="saveEv()" style="font-size:12px;padding:6px 14px">Save ingredients</button>
+      </div>
+    </div>
+  </div>`;
 }
 
 function renderPlannerOverview(){
@@ -995,6 +1100,110 @@ function renderAdminInfo(){
 }
 
 /* ══════════════════════════════════════════
+   GENERAL TASKS
+══════════════════════════════════════════ */
+const GEN_CATS=['Administration','Food','Facilities','Logistics'];
+const GEN_STATUSES=['To Do','In Progress','Done'];
+
+async function saveGenTask(gt){
+  const pl={title:gt.title||'',category:gt.category||'Administration',status:gt.status||'To Do',assignees:gt.assignees||[],planned_date:gt.planned_date||'',deadline:gt.deadline||'',notes:gt.notes||''};
+  if(gt.id){await db.from('general_tasks').update(pl).eq('id',gt.id);}
+  else{await db.from('general_tasks').insert(pl);}
+  S.genTaskForm=false;S.genTaskData={};S.editingGenTaskId=null;
+  await loadGenTasks();render();
+}
+async function deleteGenTask(id){
+  if(!confirm('Delete task?'))return;
+  await db.from('general_tasks').delete().eq('id',id);
+  await loadGenTasks();render();
+}
+async function moveGenTask(id,status){
+  await db.from('general_tasks').update({status}).eq('id',id);
+  await loadGenTasks();render();
+}
+function setGTD(k,v){S.genTaskData={...S.genTaskData,[k]:v};}
+function toggleGTDAssignee(name){
+  const arr=S.genTaskData.assignees||[];
+  S.genTaskData={...S.genTaskData,assignees:arr.includes(name)?arr.filter(x=>x!==name):[...arr,name]};
+  render();
+}
+
+function renderGeneralTasks(){
+  const tasks=S.genTasks;
+  const byStatus=(s)=>tasks.filter(t=>t.status===s);
+  const d=S.genTaskData||{};
+  const editId=S.editingGenTaskId;
+
+  const taskRow=(gt)=>{
+    if(editId===gt.id){
+      return`<div class="card" style="padding:1.25rem;margin-bottom:10px">
+        <div class="grid-2" style="margin-bottom:12px">
+          <div>${fl('Title')}<input value="${(gt.title||'').replace(/"/g,'&quot;')}" oninput="setGTD('title',this.value)" id="gtd-title-${gt.id}"></div>
+          <div>${fl('Category')}<select onchange="setGTD('category',this.value)">${GEN_CATS.map(c=>`<option${c===(d.category||gt.category)?' selected':''}>${c}</option>`).join('')}</select></div>
+          <div>${fl('Status')}<select onchange="setGTD('status',this.value)">${GEN_STATUSES.map(s=>`<option${s===(d.status||gt.status)?' selected':''}>${s}</option>`).join('')}</select></div>
+          <div>${fl('Planned date')}<input type="date" value="${d.planned_date||gt.planned_date||''}" onchange="setGTD('planned_date',this.value)"></div>
+          <div>${fl('Deadline')}<input type="date" value="${d.deadline||gt.deadline||''}" onchange="setGTD('deadline',this.value)"></div>
+          <div style="grid-column:1/-1">${fl('Notes')}<textarea onchange="setGTD('notes',this.value)">${(d.notes!==undefined?d.notes:gt.notes||'').replace(/</g,'&lt;')}</textarea></div>
+          <div style="grid-column:1/-1">${fl('Assignees')}<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px">${S.team.map(m=>{const sel=(d.assignees||gt.assignees||[]).includes(m.name);return`<button type="button" onclick="toggleGTDAssignee('${m.name}')" style="display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:99px;border:0.5px solid ${sel?'var(--brand-navy)':'var(--border2)'};background:${sel?'var(--navy-500)':'var(--bg2)'};color:${sel?'var(--cream-100)':'var(--text)'};font-size:13px;cursor:pointer">${avatar(m.name,22)}<span>${m.name}</span></button>`;}).join('')}</div></div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn-primary" onclick="saveGenTask({id:${gt.id},...S.genTaskData})">Save</button>
+          <button class="btn-ghost" onclick="S.editingGenTaskId=null;S.genTaskData={};render()">Cancel</button>
+          <button class="btn-danger" onclick="deleteGenTask(${gt.id})">Delete</button>
+        </div>
+      </div>`;
+    }
+    const hasDeadline=gt.deadline&&new Date(gt.deadline)<new Date()&&gt.status!=='Done';
+    return`<div class="task-card" style="margin-bottom:8px;cursor:default">
+      ${hasDeadline?`<div style="font-size:11px;color:#a32d2d;margin-bottom:4px;font-weight:500">&#9888; Overdue: ${fmtDate(gt.deadline)}</div>`:''}
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+        <div style="flex:1;min-width:0">
+          <div class="task-card-title">${gt.title||'Untitled'}</div>
+          <div class="task-card-meta">
+            <span class="badge" style="background:var(--bg2);color:var(--text2);font-weight:400">${gt.category}</span>
+            ${gt.planned_date?`<span>Plan: ${fmtDate(gt.planned_date)}</span>`:''}
+            ${gt.deadline?`<span style="color:${hasDeadline?'#a32d2d':'var(--text2)'}">Due: ${fmtDate(gt.deadline)}</span>`:''}
+            ${(gt.assignees||[]).map(a=>`<span>${a}</span>`).join('')}
+          </div>
+          ${gt.notes?`<div style="font-size:12px;color:var(--text2);margin-top:6px">${gt.notes.replace(/</g,'&lt;')}</div>`:''}
+        </div>
+        <div style="display:flex;gap:6px;flex-shrink:0">
+          <select style="font-size:11px;padding:3px 6px;border-radius:var(--r);background:var(--bg2);border:0.5px solid var(--border);color:var(--text2)" onchange="moveGenTask(${gt.id},this.value)">${GEN_STATUSES.map(s=>`<option${s===gt.status?' selected':''}>${s}</option>`).join('')}</select>
+          <button class="btn-icon" style="font-size:14px;opacity:0.6" onclick="S.editingGenTaskId=${gt.id};S.genTaskData={...S.genTasks.find(x=>x.id===${gt.id})};render()">&#9998;</button>
+        </div>
+      </div>
+    </div>`;
+  };
+
+  const newForm=S.genTaskForm?`<div class="card" style="padding:1.25rem;margin-bottom:1.25rem">
+    <div class="section-label" style="margin-bottom:1rem">New task</div>
+    <div class="grid-2" style="margin-bottom:12px">
+      <div>${fl('Title')}<input id="gtd-title-new" placeholder="e.g. Send contract" oninput="setGTD('title',this.value)"></div>
+      <div>${fl('Category')}<select onchange="setGTD('category',this.value)">${GEN_CATS.map(c=>`<option${c===(d.category||'Administration')?' selected':''}>${c}</option>`).join('')}</select></div>
+      <div>${fl('Status')}<select onchange="setGTD('status',this.value)">${GEN_STATUSES.map(s=>`<option${s===(d.status||'To Do')?' selected':''}>${s}</option>`).join('')}</select></div>
+      <div>${fl('Planned date')}<input type="date" value="${d.planned_date||''}" onchange="setGTD('planned_date',this.value)"></div>
+      <div>${fl('Deadline')}<input type="date" value="${d.deadline||''}" onchange="setGTD('deadline',this.value)"></div>
+      <div style="grid-column:1/-1">${fl('Notes')}<textarea onchange="setGTD('notes',this.value)"></textarea></div>
+      <div style="grid-column:1/-1">${fl('Assignees')}<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px">${S.team.map(m=>{const sel=(d.assignees||[]).includes(m.name);return`<button type="button" onclick="toggleGTDAssignee('${m.name}')" style="display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:99px;border:0.5px solid ${sel?'var(--brand-navy)':'var(--border2)'};background:${sel?'var(--navy-500)':'var(--bg2)'};color:${sel?'var(--cream-100)':'var(--text)'};font-size:13px;cursor:pointer">${avatar(m.name,22)}<span>${m.name}</span></button>`;}).join('')}</div></div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn-primary" onclick="saveGenTask({...S.genTaskData,category:S.genTaskData.category||'Administration',status:S.genTaskData.status||'To Do'})">Add task</button>
+      <button class="btn-ghost" onclick="S.genTaskForm=false;S.genTaskData={};render()">Cancel</button>
+    </div>
+  </div>`:'' ;
+
+  return`
+    <div class="topbar"><div><div class="title">Tasks</div><div class="subtitle">General & administration tasks</div></div><div class="topbar-right"><button class="btn-primary" onclick="S.genTaskForm=true;S.genTaskData={};render()">+ New task</button></div></div>
+    ${newForm}
+    <div class="kanban">${GEN_STATUSES.map(s=>{
+      const ct=byStatus(s);
+      const colors={'To Do':{bg:'var(--blue-bg)',fg:'var(--blue-fg)'},'In Progress':{bg:'var(--amber-bg)',fg:'var(--amber-fg)'},'Done':{bg:'var(--green-bg)',fg:'var(--green-fg)'}};
+      const col=colors[s];
+      return`<div class="kanban-col"><div class="kanban-col-header"><span style="color:${col.fg}">${s}</span><span class="badge" style="background:${col.bg};color:${col.fg}">${ct.length}</span></div>${ct.length===0?`<div style="font-size:12px;color:var(--text3);text-align:center;padding:1rem 0">Empty</div>`:ct.map(taskRow).join('')}</div>`;
+    }).join('')}</div>`;
+}
+
+/* ══════════════════════════════════════════
    TEAM
 ══════════════════════════════════════════ */
 async function saveTeamMember(m){
@@ -1100,6 +1309,7 @@ function render(){
     if(S.adminView==='overview')html=renderAdminOverview();
     else if(S.adminView==='detail')html=renderAdminDetail();
   }
+  else if(S.section==='tasks')html=renderGeneralTasks();
   else if(S.section==='team')html=renderTeam();
   app.innerHTML=html;
 }
