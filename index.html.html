@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Hangout PM">
 <title>The Hangout Project Manager</title>
-<link rel="icon" type="image/svg+xml" href="logo-full-gold.svg">
+<link rel="icon" type="image/svg+xml" href="Logo-gold.svg">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Work+Sans:wght@300;400;500;600;700&display=swap');
@@ -242,7 +242,7 @@ function weekLabel(dateStr){if(!dateStr)return'Unscheduled';const d=new Date(dat
 function go(s){S.section=s;render();}
 function renderNav(){
   const links=[['home','Home'],['events','Events'],['catering','Planner'],['admin','Admin'],['tasks','Tasks'],['team','Team']];
-  const logo=`<div style="width:38px;height:38px;overflow:hidden;flex-shrink:0;border-radius:50%;position:relative;background:transparent"><img src="logo-full-gold.svg" style="position:absolute;height:80px;width:auto;top:0px;left:-44px" alt="TH logo"></div>`;
+  const logo=`<img src="Logo-gold.svg" style="width:38px;height:38px;object-fit:contain;flex-shrink:0" alt="The Hangout logo">`;
   document.getElementById('nav').innerHTML=`<div class="global-nav-inner"><div class="nav-brand">${logo}<span style="font-family:var(--font-display);font-size:15px;font-weight:700;letter-spacing:0.01em">The Hangout <span style="color:var(--brand-gold)">PM</span></span></div>${links.map(([s,l])=>`<button class="nav-link${S.section===s?' active':''}" onclick="go('${s}')">${l}</button>`).join('')}</div>`;
 }
 
