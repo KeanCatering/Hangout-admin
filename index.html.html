@@ -515,12 +515,13 @@ function renderEventsList(){
 function renderEventDetail(){
   const ev=S.ev;if(!ev)return'';
 
-  // Only 3 tabs in Events: info, team, docs
-  if(!['info','team-assign','docs'].includes(S.evTab))S.evTab='info';
+  // 4 tabs in Events: info, menu+needs, team, docs
+  if(!['info','menu','team-assign','docs'].includes(S.evTab))S.evTab='info';
   const sc=SC[ev.status]||SC['Quote sent'];
-  const tabs=[['info','Event info'],['team-assign','Team'],['docs','Documents']];
+  const tabs=[['info','Event info'],['menu','Menu & Needs'],['team-assign','Team'],['docs','Documents']];
   let content='';
   if(S.evTab==='info')content=renderEvInfo();
+  else if(S.evTab==='menu')content=renderEvMenu();
   else if(S.evTab==='team-assign')content=renderEvTeamAssign();
   else if(S.evTab==='docs')content=renderEvDocs();
 
@@ -568,6 +569,14 @@ function renderEvInfo(){
       <div>${fl('Dietary requirements')}<textarea onchange="sfEv('dietary',this.value)">${(ev.dietary||'').replace(/</g,'&lt;')}</textarea></div>
       <div>${fl('Internal notes')}<textarea onchange="sfEv('notes',this.value)">${(ev.notes||'').replace(/</g,'&lt;')}</textarea></div>
     </div></div>
+  </div>`;
+}
+
+function renderEvMenu(){
+  const ev=S.ev;
+  const needs=ev.customer_needs||[];
+  const menuItems=ev.menu_items||[];
+  return`<div class="section-block">
     <div>
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
         <div class="section-label" style="margin:0">Agreed menu</div>
@@ -581,10 +590,10 @@ function renderEvInfo(){
           <div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em">Presentation</div>
           <div></div>
         </div>
-        ${(ev.menu_items||[]).length===0
+        ${menuItems.length===0
           ?`<div style="padding:1.5rem;text-align:center;color:var(--text2);font-size:13px">No dishes yet. Click "+ Add dish" to start.</div>`
-          :(ev.menu_items||[]).map((m,i)=>`<div style="display:grid;grid-template-columns:1fr 2fr 80px 1.5fr 32px;padding:8px 12px;gap:8px;align-items:center;border-bottom:0.5px solid var(--border)">
-            <input value="${(m.course||'').replace(/"/g,'&quot;')}" placeholder="Starter" style="font-size:13px" onchange="updMenuItem(${i},'course',this.value)">
+          :menuItems.map((m,i)=>`<div style="display:grid;grid-template-columns:1fr 2fr 80px 1.5fr 32px;padding:8px 12px;gap:8px;align-items:center;border-bottom:0.5px solid var(--border)">
+            <input value="${(m.course||'').replace(/"/g,'&quot;')}" placeholder="e.g. Starter" style="font-size:13px" onchange="updMenuItem(${i},'course',this.value)">
             <input value="${(m.dish||'').replace(/"/g,'&quot;')}" placeholder="Dish name" style="font-size:13px" onchange="updMenuItem(${i},'dish',this.value)">
             <input type="number" value="${m.qty||''}" placeholder="0" style="font-size:13px;text-align:center" onchange="updMenuItem(${i},'qty',this.value)">
             <input value="${(m.presentation||'').replace(/"/g,'&quot;')}" placeholder="e.g. cut into 4 pieces" style="font-size:13px" onchange="updMenuItem(${i},'presentation',this.value)">
@@ -599,7 +608,7 @@ function renderEvInfo(){
           <button class="btn-ghost" style="padding:4px 10px;font-size:12px" onclick="S.newNeedForm=!S.newNeedForm;render()">+ Add</button>
         </div>
         ${S.newNeedForm?`<div style="padding:12px 16px;border-bottom:0.5px solid var(--border);display:flex;gap:8px;flex-wrap:wrap"><input id="need-count" type="number" placeholder="Count" style="width:80px"><input id="need-text" placeholder="e.g. nut allergy" style="flex:1"><button class="btn-primary" style="padding:7px 14px" onclick="addNeed()">Add</button></div>`:''}
-        ${(ev.customer_needs||[]).length===0?`<div style="padding:1rem 16px;font-size:13px;color:var(--text2)">No requirements noted.</div>`:(ev.customer_needs||[]).map(n=>`<div class="need-row" style="padding:8px 16px"><span style="font-size:13px">${n.count>0?`<strong>${n.count}</strong> guests — `:''}<span>${n.text}</span></span><button class="btn-icon" style="color:#a32d2d;font-size:16px;margin-left:auto" onclick="removeNeed('${n.id}')">×</button></div>`).join('')}
+        ${needs.length===0?`<div style="padding:1rem 16px;font-size:13px;color:var(--text2)">No requirements noted.</div>`:needs.map(n=>`<div class="need-row" style="padding:8px 16px"><span style="font-size:13px">${n.count>0?`<strong>${n.count}</strong> guests — `:''}<span>${n.text}</span></span><button class="btn-icon" style="color:#a32d2d;font-size:16px;margin-left:auto" onclick="removeNeed('${n.id}')">×</button></div>`).join('')}
       </div>
     </div>
   </div>`;
@@ -736,7 +745,7 @@ function renderNewTaskForm(){
       <div>${fl('Planned date')}<input type="date" value="${d.plannedDate||''}" onchange="setNTD('plannedDate',this.value)"></div>
       <div>${fl('Deadline')}<input type="date" value="${d.deadline||''}" onchange="setNTD('deadline',this.value)"></div>
       <div>${fl('Portions')}<input type="number" value="${d.portions||''}" placeholder="0" onchange="setNTD('portions',this.value)"></div>
-      <div style="grid-column:1/-1">${fl('Dish / menu item')}<input value="${(d.dish||'').replace(/"/g,'&quot;')}" placeholder="e.g. Chicken springrolls, Pho Bo..." onchange="setNTD('dish',this.value)" list="menu-dishes-ntf"><datalist id="menu-dishes-ntf">${(S.ev?.menu||'').split('\n').map(l=>l.trim()).filter(Boolean).map(l=>`<option value="${l.replace(/"/g,'&quot;')}">`).join('')}</datalist></div>
+      <div style="grid-column:1/-1">${fl('Dish / menu item')}<select onchange="setNTD('dish',this.value)"><option value="">— Select dish —</option>${(S.ev?.menu_items||[]).map(m=>m.dish).filter(Boolean).map(d=>`<option${d===S.newTaskData?.dish?' selected':''}>${d}</option>`).join('')}</select>${(S.ev?.menu_items||[]).length===0?`<div style="font-size:11px;color:var(--text3);margin-top:4px">Add dishes first in Events → Menu & Needs.</div>`:''}</div>
     </div>
     <div style="margin-bottom:12px">
       <div class="field-label" style="margin-bottom:8px">Allergen flags</div>
@@ -771,7 +780,7 @@ function renderTaskDetail(){
         <div>${fl('Planned date')}<input type="date" value="${t.plannedDate||''}" onchange="updateTask('plannedDate',this.value)"></div>
         <div>${fl('Deadline')}<input type="date" value="${t.deadline||''}" onchange="updateTask('deadline',this.value)"></div>
         <div>${fl('Portions')}<input type="number" value="${t.portions||''}" placeholder="0" onchange="updateTask('portions',this.value)"></div>
-        <div style="grid-column:1/-1">${fl('Dish / menu item')}<input value="${(t.dish||'').replace(/"/g,'&quot;')}" placeholder="e.g. Chicken springrolls, Pho Bo..." onchange="updateTask('dish',this.value)" list="menu-dishes-td"><datalist id="menu-dishes-td">${(S.ev?.menu||'').split('\n').map(l=>l.trim()).filter(Boolean).map(l=>`<option value="${l.replace(/"/g,'&quot;')}">`).join('')}</datalist></div>
+        <div style="grid-column:1/-1">${fl('Dish / menu item')}<select onchange="updateTask('dish',this.value)"><option value="">— Select dish —</option>${(S.ev?.menu_items||[]).map(m=>m.dish).filter(Boolean).map(d=>`<option${d===t.dish?' selected':''}>${d}</option>`).join('')}</select>${(S.ev?.menu_items||[]).length===0?`<div style="font-size:11px;color:var(--text3);margin-top:4px">Add dishes first in Events → Menu & Needs.</div>`:''}</div>
       </div>
       <div style="margin-bottom:1.25rem">
         <div class="field-label" style="margin-bottom:8px">Allergen flags</div>
