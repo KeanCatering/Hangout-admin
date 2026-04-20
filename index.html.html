@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Hangout PM">
 <title>The Hangout Project Manager</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Crect%20width%3D%22100%22%20height%3D%22100%22%20rx%3D%2250%22%20fill%3D%22%23001921%22/%3E%3Ccircle%20cx%3D%2250%22%20cy%3D%2250%22%20r%3D%2246%22%20stroke%3D%22%23FFD243%22%20stroke-width%3D%224%22%20fill%3D%22none%22/%3E%3Ccircle%20cx%3D%2250%22%20cy%3D%2250%22%20r%3D%2239%22%20stroke%3D%22%23FFD243%22%20stroke-width%3D%222%22%20fill%3D%22none%22/%3E%3Cg%20fill%3D%22%23FFD243%22%3E%3Crect%20x%3D%2218%22%20y%3D%2222%22%20width%3D%2237%22%20height%3D%228%22/%3E%3Crect%20x%3D%2229%22%20y%3D%2222%22%20width%3D%228%22%20height%3D%2256%22/%3E%3Crect%20x%3D%2262%22%20y%3D%2222%22%20width%3D%228%22%20height%3D%2256%22/%3E%3Crect%20x%3D%2237%22%20y%3D%2244%22%20width%3D%2233%22%20height%3D%228%22/%3E%3Crect%20x%3D%2249%22%20y%3D%2222%22%20width%3D%2221%22%20height%3D%228%22/%3E%3C/g%3E%3C/svg%3E">
+<link rel="icon" type="image/svg+xml" href="logo-full-gold.svg">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Work+Sans:wght@300;400;500;600;700&display=swap');
@@ -242,22 +242,7 @@ function weekLabel(dateStr){if(!dateStr)return'Unscheduled';const d=new Date(dat
 function go(s){S.section=s;render();}
 function renderNav(){
   const links=[['home','Home'],['events','Events'],['catering','Planner'],['admin','Admin'],['tasks','Tasks'],['team','Team']];
-  const logo=`<svg width="34" height="34" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="50" cy="50" r="46" stroke="#FFD243" stroke-width="4" fill="none"/>
-    <circle cx="50" cy="50" r="39" stroke="#FFD243" stroke-width="2" fill="none"/>
-    <g fill="#FFD243">
-      <!-- T horizontal bar -->
-      <rect x="18" y="22" width="37" height="8"/>
-      <!-- T vertical / H left leg (shared) -->
-      <rect x="29" y="22" width="8" height="56"/>
-      <!-- H right leg -->
-      <rect x="62" y="22" width="8" height="56"/>
-      <!-- H crossbar -->
-      <rect x="37" y="44" width="33" height="8"/>
-      <!-- H top cap -->
-      <rect x="49" y="22" width="21" height="8"/>
-    </g>
-  </svg>`;
+  const logo=`<div style="width:38px;height:38px;overflow:hidden;flex-shrink:0;border-radius:50%;position:relative"><img src="logo-full-gold.svg" style="position:absolute;height:145px;width:auto;top:-2px;left:-41px" alt="TH logo"></div>`;
   document.getElementById('nav').innerHTML=`<div class="global-nav-inner"><div class="nav-brand">${logo}<span style="font-family:var(--font-display);font-size:15px;font-weight:700;letter-spacing:0.01em">The Hangout <span style="color:var(--brand-gold)">PM</span></span></div>${links.map(([s,l])=>`<button class="nav-link${S.section===s?' active':''}" onclick="go('${s}')">${l}</button>`).join('')}</div>`;
 }
 
