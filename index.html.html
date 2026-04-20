@@ -1115,11 +1115,17 @@ const GEN_CATS=['Administration','Food','Facilities','Logistics'];
 const GEN_STATUSES=['To Do','In Progress','Done'];
 
 async function saveGenTask(gt){
-  const pl={title:gt.title||'',category:gt.category||'Administration',status:gt.status||'To Do',assignees:gt.assignees||[],planned_date:gt.planned_date||'',deadline:gt.deadline||'',notes:gt.notes||''};
-  if(gt.id){await db.from('general_tasks').update(pl).eq('id',gt.id);}
-  else{await db.from('general_tasks').insert(pl);}
-  S.genTaskForm=false;S.genTaskData={};S.editingGenTaskId=null;
-  await loadGenTasks();render();
+  // Read title from DOM in case state wasn't updated (input focus not lost)
+  const titleEl=document.getElementById('gtd-title-new')||document.getElementById('gtd-title-'+(gt.id||''));
+  const title=(titleEl?.value||gt.title||'').trim();
+  if(!title){alert('Please enter a task title.');return;}
+  const pl={title,category:gt.category||S.genTaskData.category||'Administration',status:gt.status||S.genTaskData.status||'To Do',assignees:gt.assignees||S.genTaskData.assignees||[],planned_date:gt.planned_date||S.genTaskData.planned_date||'',deadline:gt.deadline||S.genTaskData.deadline||'',notes:gt.notes||S.genTaskData.notes||''};
+  try{
+    if(gt.id){const{error}=await db.from('general_tasks').update(pl).eq('id',gt.id);if(error)throw error;}
+    else{const{error}=await db.from('general_tasks').insert(pl);if(error)throw error;}
+    S.genTaskForm=false;S.genTaskData={};S.editingGenTaskId=null;
+    await loadGenTasks();render();
+  }catch(err){alert('Failed to save: '+err.message);}
 }
 async function deleteGenTask(id){
   if(!confirm('Delete task?'))return;
@@ -1196,7 +1202,7 @@ function renderGeneralTasks(){
       <div style="grid-column:1/-1">${fl('Assignees')}<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px">${S.team.map(m=>{const sel=(d.assignees||[]).includes(m.name);return`<button type="button" onclick="toggleGTDAssignee('${m.name}')" style="display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:99px;border:0.5px solid ${sel?'var(--brand-navy)':'var(--border2)'};background:${sel?'var(--navy-500)':'var(--bg2)'};color:${sel?'var(--cream-100)':'var(--text)'};font-size:13px;cursor:pointer">${avatar(m.name,22)}<span>${m.name}</span></button>`;}).join('')}</div></div>
     </div>
     <div style="display:flex;gap:8px">
-      <button class="btn-primary" onclick="saveGenTask({...S.genTaskData,category:S.genTaskData.category||'Administration',status:S.genTaskData.status||'To Do'})">Add task</button>
+      <button class="btn-primary" onclick="saveGenTask(S.genTaskData)">Add task</button>
       <button class="btn-ghost" onclick="S.genTaskForm=false;S.genTaskData={};render()">Cancel</button>
     </div>
   </div>`:'' ;
