@@ -733,7 +733,7 @@ function renderNewTaskForm(){
       <div>${fl('Category')}<select onchange="setNTD('category',this.value)">${TASK_CATS.map(c=>`<option${c===d.category?' selected':''}>${c}</option>`).join('')}</select></div>
       <div>${fl('Status')}<select onchange="setNTD('status',this.value)">${TASK_STATUSES.map(s=>`<option${s===d.status?' selected':''}>${s}</option>`).join('')}</select></div>
       <div style="grid-column:1/-1">${fl('Assignees (select multiple)')}<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px">${S.team.length===0?`<span style="font-size:13px;color:var(--text2)">No team members yet</span>`:S.team.map(m=>{const sel=(d.assignees||[]).includes(m.name);return`<button type="button" onclick="toggleNTDAssignee('${m.name}')" style="display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:99px;border:0.5px solid ${sel?'var(--brand-navy)':'var(--border2)'};background:${sel?'var(--navy-500)':'var(--bg2)'};color:${sel?'var(--cream-100)':'var(--text)'};font-size:13px;cursor:pointer;transition:all 0.15s">${avatar(m.name,22)}<span>${m.name}</span></button>`;}).join('')}</div></div>
-      <div>${fl('Planned date')}<input type="date" value="${d.plannedDate||''}" onchange="setNTD('plannedDate',this.value)"></div>
+      
       <div>${fl('Deadline')}<input type="date" value="${d.deadline||''}" onchange="setNTD('deadline',this.value)"></div>
       <div>${fl('Portions')}<input type="number" value="${d.portions||''}" placeholder="0" onchange="setNTD('portions',this.value)"></div>
       <div style="grid-column:1/-1">${fl('Dish / menu item')}<select onchange="setNTD('dish',this.value)"><option value="">— Select dish —</option>${(S.ev?.menu_items||[]).map(m=>m.dish).filter(Boolean).map(d=>`<option${d===S.newTaskData?.dish?' selected':''}>${d}</option>`).join('')}</select>${(S.ev?.menu_items||[]).length===0?`<div style="font-size:11px;color:var(--text3);margin-top:4px">Add dishes first in Events → Menu & Needs.</div>`:''}</div>
@@ -768,7 +768,7 @@ function renderTaskDetail(){
       <div class="grid-2" style="margin-bottom:1.25rem">
         <div>${fl('Category')}<select onchange="updateTask('category',this.value)">${TASK_CATS.map(c=>`<option${c===t.category?' selected':''}>${c}</option>`).join('')}</select></div>
         <div style="grid-column:1/-1">${fl('Assignees (select multiple)')}<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px">${S.team.length===0?`<span style="font-size:13px;color:var(--text2)">No team members yet</span>`:S.team.map(m=>{const sel=(t.assignees||[t.assignee].filter(Boolean)).includes(m.name);return`<button type="button" onclick="toggleTaskAssignee('${m.name}')" style="display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:99px;border:0.5px solid ${sel?'var(--brand-navy)':'var(--border2)'};background:${sel?'var(--navy-500)':'var(--bg2)'};color:${sel?'var(--cream-100)':'var(--text)'};font-size:13px;cursor:pointer;transition:all 0.15s">${avatar(m.name,22)}<span>${m.name}</span></button>`;}).join('')}</div></div>
-        <div>${fl('Planned date')}<input type="date" value="${t.plannedDate||''}" onchange="updateTask('plannedDate',this.value)"></div>
+        
         <div>${fl('Deadline')}<input type="date" value="${t.deadline||''}" onchange="updateTask('deadline',this.value)"></div>
         <div>${fl('Portions')}<input type="number" value="${t.portions||''}" placeholder="0" onchange="updateTask('portions',this.value)"></div>
         <div style="grid-column:1/-1">${fl('Dish / menu item')}<select onchange="updateTask('dish',this.value)"><option value="">— Select dish —</option>${(S.ev?.menu_items||[]).map(m=>m.dish).filter(Boolean).map(d=>`<option${d===t.dish?' selected':''}>${d}</option>`).join('')}</select>${(S.ev?.menu_items||[]).length===0?`<div style="font-size:11px;color:var(--text3);margin-top:4px">Add dishes first in Events → Menu & Needs.</div>`:''}</div>
@@ -1147,7 +1147,7 @@ function renderGeneralTasks(){
           <div>${fl('Title')}<input value="${(gt.title||'').replace(/"/g,'&quot;')}" oninput="setGTD('title',this.value)" id="gtd-title-${gt.id}"></div>
           <div>${fl('Category')}<select onchange="setGTD('category',this.value)">${GEN_CATS.map(c=>`<option${c===(d.category||gt.category)?' selected':''}>${c}</option>`).join('')}</select></div>
           <div>${fl('Status')}<select onchange="setGTD('status',this.value)">${GEN_STATUSES.map(s=>`<option${s===(d.status||gt.status)?' selected':''}>${s}</option>`).join('')}</select></div>
-          <div>${fl('Planned date')}<input type="date" value="${d.planned_date||gt.planned_date||''}" onchange="setGTD('planned_date',this.value)"></div>
+          
           <div>${fl('Deadline')}<input type="date" value="${d.deadline||gt.deadline||''}" onchange="setGTD('deadline',this.value)"></div>
           <div style="grid-column:1/-1">${fl('Notes')}<textarea onchange="setGTD('notes',this.value)">${(d.notes!==undefined?d.notes:gt.notes||'').replace(/</g,'&lt;')}</textarea></div>
           <div style="grid-column:1/-1">${fl('Assignees')}<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px">${S.team.map(m=>{const sel=(d.assignees||gt.assignees||[]).includes(m.name);return`<button type="button" onclick="toggleGTDAssignee('${m.name}')" style="display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:99px;border:0.5px solid ${sel?'var(--brand-navy)':'var(--border2)'};background:${sel?'var(--navy-500)':'var(--bg2)'};color:${sel?'var(--cream-100)':'var(--text)'};font-size:13px;cursor:pointer">${avatar(m.name,22)}<span>${m.name}</span></button>`;}).join('')}</div></div>
@@ -1167,7 +1167,7 @@ function renderGeneralTasks(){
           <div class="task-card-title">${gt.title||'Untitled'}</div>
           <div class="task-card-meta">
             <span class="badge" style="background:var(--bg2);color:var(--text2);font-weight:400">${gt.category}</span>
-            ${gt.planned_date?`<span>Plan: ${fmtDate(gt.planned_date)}</span>`:''}
+            
             ${gt.deadline?`<span style="color:${hasDeadline?'#a32d2d':'var(--text2)'}">Due: ${fmtDate(gt.deadline)}</span>`:''}
             ${(gt.assignees||[]).map(a=>`<span>${a}</span>`).join('')}
           </div>
@@ -1187,7 +1187,7 @@ function renderGeneralTasks(){
       <div>${fl('Title')}<input id="gtd-title-new" placeholder="e.g. Send contract" oninput="setGTD('title',this.value)"></div>
       <div>${fl('Category')}<select onchange="setGTD('category',this.value)">${GEN_CATS.map(c=>`<option${c===(d.category||'Administration')?' selected':''}>${c}</option>`).join('')}</select></div>
       <div>${fl('Status')}<select onchange="setGTD('status',this.value)">${GEN_STATUSES.map(s=>`<option${s===(d.status||'To Do')?' selected':''}>${s}</option>`).join('')}</select></div>
-      <div>${fl('Planned date')}<input type="date" value="${d.planned_date||''}" onchange="setGTD('planned_date',this.value)"></div>
+      
       <div>${fl('Deadline')}<input type="date" value="${d.deadline||''}" onchange="setGTD('deadline',this.value)"></div>
       <div style="grid-column:1/-1">${fl('Notes')}<textarea onchange="setGTD('notes',this.value)"></textarea></div>
       <div style="grid-column:1/-1">${fl('Assignees')}<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px">${S.team.map(m=>{const sel=(d.assignees||[]).includes(m.name);return`<button type="button" onclick="toggleGTDAssignee('${m.name}')" style="display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:99px;border:0.5px solid ${sel?'var(--brand-navy)':'var(--border2)'};background:${sel?'var(--navy-500)':'var(--bg2)'};color:${sel?'var(--cream-100)':'var(--text)'};font-size:13px;cursor:pointer">${avatar(m.name,22)}<span>${m.name}</span></button>`;}).join('')}</div></div>
